@@ -21,6 +21,7 @@ auto UserSettings::imgui() -> bool
     b |= i18n::imgui_language_selector();
     b |= imgui_ui_zoom();
     b |= imgui_extra_icons();
+    b |= imgui_view_background();
 
     ImGuiExtras::separator_text(Cool::tr("Camera"));
     b |= imgui_camera2D_zoom_sensitivity();
@@ -101,6 +102,21 @@ auto UserSettings::imgui_video_export_overwrite_behaviour() -> bool
 
 static constexpr float min_ui_zoom = 0.5f;
 static constexpr float max_ui_zoom = 2.f;
+
+auto UserSettings::imgui_view_background() -> bool
+{
+    bool b = false;
+    std::string const items = std::string{Cool::tr("Checkerboard")} + '\0' + Cool::tr("Solid dark") + '\0' + Cool::tr("Solid light") + '\0' + Cool::tr("Custom color") + '\0';
+    int               current = static_cast<int>(view_background);
+    if (ImGui::Combo(Cool::i18n::label("View background").c_str(), &current, items.c_str()))
+    {
+        view_background = static_cast<ViewBackground>(current);
+        b               = true;
+    }
+    if (view_background == ViewBackground::CustomColor)
+        b |= ImGui::ColorEdit3(Cool::i18n::label("Custom color").c_str(), &view_background_custom_color.x);
+    return b;
+}
 
 auto UserSettings::imgui_ui_zoom() -> bool
 {

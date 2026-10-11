@@ -7,6 +7,7 @@
 #include "Cool/UserSettings/UserSettings.h"
 #include "Cool/Window/set_main_window_fullscreen.hpp"
 #include "img/src/SizeU.h"
+#include <imgui/imgui_internal.h>
 
 namespace Cool {
 
@@ -245,11 +246,43 @@ void View::display_image(ImTextureID image_texture_id, img::Size image_size)
     _has_vertical_margins = img::aspect_ratio(size) <= img::aspect_ratio(*_window_size);
 
     ImGui::PushStyleVar(ImGuiStyleVar_ImageBorderSize, 0.f);
-    // Alpha checkerboard background
-    ImGuiExtras::image_centered(_checkerboard_texture.get(img::Size{size}).imgui_texture_id(), as_imvec2(size));
+    // Background
+    auto& settings = user_settings();
+    if (settings.view_background == ViewBackground::Checkerboard)
+    {
+        ImGuiExtras::image_centered(_checkerboard_texture.get(img::Size{size}).imgui_texture_id(), as_imvec2(size));
+    }
+    else
+    {
+        ImVec4 color = settings.view_background_custom_color;
+        if (settings.view_background == ViewBackground::SolidDark)
+            color = ImVec4{0.08f, 0.08f, 0.08f, 1.f};
+        else if (settings.view_background == ViewBackground::SolidLight)
+            color = ImVec4{0.92f, 0.92f, 0.92f, 1.f};
+        auto const prev_pos = ImGui::GetCursorScreenPos();
+        ImGui::SetCursorPos((ImGui::GetWindowSize() + ImVec2{0.f, ImGui::GetCurrentWindow()->TitleBarHeight} - as_imvec2(size)) * 0.5f);
+        auto const min = ImGui::GetCursorScreenPos();
+        ImGui::GetWindowDrawList()->AddRectFilled(min, ImVec2{min.x + size.width(), min.y + size.height()}, ImGui::GetColorU32(color));
+        ImGui::SetCursorScreenPos(prev_pos);
+    }
     // Actual image. It needs to use straight alpha as this is what ImGui expects.
     ImGuiExtras::image_centered(image_texture_id, as_imvec2(size));
     ImGui::PopStyleVar();
+
+    if (ImGui::BeginPopupContextWindow("##view_background_menu"))
+    {
+        if (ImGui::RadioButton(Cool::tr("Checkerboard"), settings.view_background == ViewBackground::Checkerboard))
+            settings.view_background = ViewBackground::Checkerboard;
+        if (ImGui::RadioButton(Cool::tr("Solid dark"), settings.view_background == ViewBackground::SolidDark))
+            settings.view_background = ViewBackground::SolidDark;
+        if (ImGui::RadioButton(Cool::tr("Solid light"), settings.view_background == ViewBackground::SolidLight))
+            settings.view_background = ViewBackground::SolidLight;
+        if (ImGui::RadioButton(Cool::tr("Custom color"), settings.view_background == ViewBackground::CustomColor))
+            settings.view_background = ViewBackground::CustomColor;
+        if (settings.view_background == ViewBackground::CustomColor)
+            ImGui::ColorEdit3(Cool::i18n::label("Custom color").c_str(), &settings.view_background_custom_color.x);
+        ImGui::EndPopup();
+    }
 }
 
 auto View::aspect_ratio() const -> float

@@ -9,6 +9,13 @@
 
 namespace Cool {
 
+enum class ViewBackground {
+    Checkerboard,
+    SolidDark,
+    SolidLight,
+    CustomColor,
+};
+
 auto should_enable_multi_viewport_by_default() -> bool;
 
 struct UserSettings {
@@ -21,6 +28,8 @@ struct UserSettings {
     VideoExportOverwriteBehaviour video_export_overwrite_behaviour{VideoExportOverwriteBehaviour::AskBeforeCreatingNewFolder};
     float                         ui_zoom{1.f};
     std::string                   language{"ru"}; // Russian is the default language
+    ViewBackground                view_background{ViewBackground::Checkerboard};
+    ImVec4                        view_background_custom_color{0.2f, 0.2f, 0.2f, 1.f};
 
     void change_ui_zoom(float delta);
     void set_ui_zoom(float zoom);
@@ -36,6 +45,7 @@ struct UserSettings {
     auto imgui_enable_multi_viewport() -> bool;
     auto imgui_video_export_overwrite_behaviour() -> bool;
     auto imgui_ui_zoom() -> bool;
+    auto imgui_view_background() -> bool;
 
     void update() { _serializer.update(); }
     void save() { _serializer.save(); }
@@ -62,6 +72,8 @@ private:
             json_get(json, "UI Scale", ui_zoom); // Backward compatibility
             json_get(json, "UI Zoom", ui_zoom);
             json_get(json, "Language", language);
+            json_get(json, "View background", view_background);
+            json_get(json, "View background custom color", view_background_custom_color);
             need_to_rebuild_fonts() = true;
         },
         [&](nlohmann::json& json) {
@@ -74,6 +86,8 @@ private:
             json_set(json, "Video export overwrite behaviour", video_export_overwrite_behaviour);
             json_set(json, "UI Zoom", ui_zoom);
             json_set(json, "Language", language);
+            json_set(json, "View background", view_background);
+            json_set(json, "View background custom color", view_background_custom_color);
         },
         true /*use_shared_user_data*/
     };
