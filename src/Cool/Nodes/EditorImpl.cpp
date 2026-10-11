@@ -5,6 +5,7 @@
 #include "Cool/ImGui/ImGuiExtrasStyle.h"
 #include "Cool/ImGui/ImGuiExtras_dropdown.hpp"
 #include "Cool/ImGui/icon_fmt.h"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/StrongTypes/Color.h"
 #include "NodesConfig.h"
 #include "NodesGraph.h"
@@ -29,7 +30,7 @@ auto SearchBarState::imgui_widget() -> bool
         ImGui::SetKeyboardFocusHere();
     }
     ImGui::PushID(868686);
-    bool const b = ImGui::InputTextWithHint("##Filter", icon_fmt("Search for a node or category", ICOMOON_SEARCH).c_str(), &_nodes_filter, ImGuiInputTextFlags_EnterReturnsTrue);
+    bool const b = ImGui::InputTextWithHint("##Filter", icon_fmt(tr("Name or task"), ICOMOON_SEARCH).c_str(), &_nodes_filter, ImGuiInputTextFlags_EnterReturnsTrue);
     ImGui::PopID();
     return b;
 }
@@ -83,7 +84,7 @@ static auto dropdown_to_switch_between_nodes_of_the_same_category(NodeId const& 
 
         auto get_label() const -> std::string
         {
-            return entry_definition->name();
+            return i18n::tr_node(node->category_name(), entry_definition->name());
         }
 
         void apply_value() const
@@ -96,7 +97,7 @@ static auto dropdown_to_switch_between_nodes_of_the_same_category(NodeId const& 
     for (auto const& def : category->definitions())
         entries.push_back({&def, &node_id, &node, &nodes_cfg});
 
-    return ImGuiExtras::dropdown("", node.definition_name().c_str(), entries);
+    return ImGuiExtras::dropdown("", i18n::tr_node(node.category_name(), node.definition_name()).c_str(), entries);
 }
 
 [[nodiscard]] static auto is_listening_to_keyboard_shortcuts() -> bool
@@ -161,7 +162,7 @@ auto NodesEditorImpl::imgui_window_workspace(
     ed::PushStyleColor(ed::StyleColor_HovLinkBorder, ImGuiExtras::GetStyle().node_link_hovered);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0.f, 0.f});
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.f);
-    bool const should_render_window = ImGui::Begin(icon_fmt("Nodes", ICOMOON_TREE).c_str(), nullptr, ImGuiWindowFlags_NoScrollbar);
+    bool const should_render_window = ImGui::Begin(i18n::window_title(icon_fmt("Nodes", ICOMOON_TREE)).c_str(), nullptr, ImGuiWindowFlags_NoScrollbar);
     ImGui::PopStyleVar(2);
     auto const prev_tesselation                  = ImGui::GetStyle().CircleTessellationMaxError;
     ImGui::GetStyle().CircleTessellationMaxError = 0.1f; // Make borders smooth even when zooming.
@@ -213,14 +214,14 @@ static void imgui_rename_node(std::string& node_name)
 {
     if (ImGui::IsWindowAppearing())
         ImGui::SetKeyboardFocusHere();
-    if (ImGui::InputText("Title", &node_name, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+    if (ImGui::InputText(Cool::i18n::label("Title").c_str(), &node_name, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
         ImGui::CloseCurrentPopup();
 }
 
 auto NodesEditorImpl::imgui_window_inspector(NodesConfig& nodes_cfg, NodesLibrary const& library) -> bool
 {
     bool graph_has_changed = false;
-    if (ImGui::Begin(icon_fmt("Inspector", ICOMOON_EQUALIZER).c_str()))
+    if (ImGui::Begin(i18n::window_title(icon_fmt("Inspector", ICOMOON_EQUALIZER)).c_str()))
     {
         auto const selected_nodes_ids = get_selected_nodes_ids();
 
@@ -265,12 +266,17 @@ auto NodesEditorImpl::imgui_windows(
 }
 
 auto NodesEditorImpl::imgui_nodes_menu(NodesLibrary const& library, MaybeDisableNodeDefinition const& maybe_disable, bool menu_just_opened)
-    -> std::optional<NodeDefinitionAndCategoryName>
+    -> std::optional<NodesMenuSelection>
 {
-    bool const should_select_first_node   = _search_bar.imgui_widget();
-    bool       should_open_all_categories = ImGui::IsItemEdited();
+    bool const should_select_first_node = _search_bar.imgui_widget();
 
-    return library.imgui_nodes_menu(_search_bar.get_nodes_filter(), maybe_disable, should_select_first_node, should_open_all_categories, menu_just_opened);
+    return library.imgui_nodes_menu(NodesMenuParams{
+        .filter              = _search_bar.get_nodes_filter(),
+        .maybe_disable       = maybe_disable,
+        .check_compatibility = _pin_to_link_to_new_node ? &_check_compatibility : nullptr,
+        .select_first        = should_select_first_node,
+        .menu_just_opened    = menu_just_opened,
+    });
 }
 
 static auto find_pin(ed::PinId const& id, NodesGraph const& graph) -> Pin const*
@@ -359,7 +365,7 @@ void NodesEditorImpl::render_node(Node& node, NodeId const& id, NodesConfig& nod
     ImGui::PushFont(Font::bold());
     ImGui::PushStyleColor(ImGuiCol_Text, title_color.as_ImColor().Value);
     auto const node_name = nodes_cfg.name(node);
-    ImGui::TextUnformatted((node_name.empty() ? node.definition_name() : node_name).c_str());
+    ImGui::TextUnformatted((node_name.empty() ? i18n::tr_node(node.category_name(), node.definition_name()) : node_name).c_str()); // When the node hasn't been renamed by the user, show the translated name of its definition
     ImGui::PopStyleColor();
     ImGui::PopFont();
     ImGui::Spring(1);
@@ -392,7 +398,7 @@ void NodesEditorImpl::render_node(Node& node, NodeId const& id, NodesConfig& nod
         ImGui::Spring(0);
         if (!input_pin.name().empty())
         {
-            ImGui::TextUnformatted(input_pin.name().c_str());
+            ImGui::TextUnformatted(i18n::tr_input(input_pin.name()).c_str());
             ImGui::Spring(0);
         }
         if (!input_pin.description().empty())
@@ -415,7 +421,7 @@ void NodesEditorImpl::render_node(Node& node, NodeId const& id, NodesConfig& nod
         if (!output_pin.name().empty())
         {
             ImGui::Spring(0);
-            ImGui::TextUnformatted(output_pin.name().c_str());
+            ImGui::TextUnformatted(i18n::tr_input(output_pin.name()).c_str());
         }
         if (!output_pin.description().empty())
         {
@@ -757,6 +763,9 @@ auto NodesEditorImpl::imgui_workspace(NodesConfig& nodes_cfg, NodesLibrary const
         open_nodes_menu();
         if (!_link_has_just_been_released)
             _pin_to_link_to_new_node = nullptr;
+        _check_compatibility = _pin_to_link_to_new_node
+                                   ? nodes_cfg.check_node_compatibility(*_pin_to_link_to_new_node)
+                                   : CheckNodeCompatibility{};
         _link_has_just_been_released = false;
     }
 
@@ -777,21 +786,25 @@ auto NodesEditorImpl::imgui_workspace(NodesConfig& nodes_cfg, NodesLibrary const
         ImGuiExtras::help_marker_tooltip_content(_deferred_tooltip_text->c_str());
         ImGui::EndTooltip();
     }
+    ImGui::SetNextWindowSizeConstraints(ImVec2{0.f, 0.f}, ImVec2{FLT_MAX, ImGui::GetMainViewport()->WorkSize.y * 0.8f}); // Make sure the menu always fits on screen
     if (ImGui::BeginPopup("Nodes Library Menu"))
     {
-        auto const new_node_def_id = imgui_nodes_menu(library, nodes_cfg.maybe_disable_node_definition(), _menu_just_opened);
-        _menu_just_opened          = false;
-        if (ImGui::Selectable("Frame (Comment)"))
+        auto const selection = imgui_nodes_menu(library, nodes_cfg.maybe_disable_node_definition(), _menu_just_opened);
+        _menu_just_opened    = false;
+        bool const can_create_frame = _search_bar.get_nodes_filter().empty() && !_pin_to_link_to_new_node; // A frame can't be linked to anything
+        if (can_create_frame)
+            ImGui::Separator();
+        if (can_create_frame && ImGui::Selectable(tr("Frame (Comment)")))
         {
             auto const& frame_node = _frame_nodes.emplace_back();
             ed::SetNodePosition(as_ed_id(frame_node.id), _next_node_position);
         }
 
-        if (new_node_def_id)
+        if (selection)
         {
             ImGui::CloseCurrentPopup();
 
-            auto const new_node_id = nodes_cfg.add_node(*new_node_def_id);
+            auto const new_node_id = nodes_cfg.add_node(selection->def_and_cat);
             auto*      new_node    = _graph.nodes().get_mutable_ref(new_node_id);
             if (new_node)
             {
@@ -801,14 +814,18 @@ auto NodesEditorImpl::imgui_workspace(NodesConfig& nodes_cfg, NodesLibrary const
 
                 if (auto const* begin_pin = _pin_to_link_to_new_node)
                 {
+                    // Plug the new node into the pin that was found to be compatible, or the first one otherwise
+                    auto const pin_index = selection->compatibility ? selection->compatibility->pin_index : 0;
                     if (begin_pin->kind() == PinKind::Input && !new_node->output_pins().empty())
                     {
+                        auto const& output_pin = new_node->output_pins()[pin_index < new_node->output_pins().size() ? pin_index : 0];
                         remove_all_links_connected_to_input_pin(begin_pin->id(), nodes_cfg); // Must be done before adding the link, otherwise we would remove it too
-                        nodes_cfg.add_link(Link{new_node->output_pins()[0].id(), begin_pin->id()});
+                        nodes_cfg.add_link(Link{output_pin.id(), begin_pin->id()});
                     }
-                    else if (!new_node->input_pins().empty())
+                    else if (begin_pin->kind() == PinKind::Output && !new_node->input_pins().empty())
                     {
-                        nodes_cfg.add_link(Link{begin_pin->id(), new_node->input_pins()[0].id()});
+                        auto const& input_pin = new_node->input_pins()[pin_index < new_node->input_pins().size() ? pin_index : 0];
+                        nodes_cfg.add_link(Link{begin_pin->id(), input_pin.id()});
                     }
                 }
 

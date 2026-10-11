@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "run.h"
 #include <exception>
 #include <filesystem>
@@ -111,7 +112,7 @@ void run_impl(
         ImStyleEd::error_handlers().on_mandatory_warning = [](std::string_view error_message) {
             ImGuiNotify::send({
                 .type    = ImGuiNotify::Type::Warning,
-                .title   = "Color Themes",
+                .title   = Cool::tr("Color Themes"),
                 .content = std::string{error_message},
             });
         };

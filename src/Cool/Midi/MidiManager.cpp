@@ -1,4 +1,5 @@
 #include "MidiManager.h"
+#include "Cool/i18n/i18n.hpp"
 #include <chrono>
 #include "Cool/ImGui/Fonts.h"
 #include "Cool/ImGui/IcoMoonCodepoints.h"
@@ -247,7 +248,7 @@ void MidiManager::send_error_notification_if_any() const
 
     ImGuiNotify::send({
         .type     = ImGuiNotify::Type::Warning,
-        .title    = "MIDI",
+        .title    = Cool::tr("MIDI"),
         .content  = *_error_message,
         .duration = std::nullopt,
         .closable = true,
@@ -316,7 +317,7 @@ void MidiManager::imgui_window()
 void MidiManager::imgui_visualize_channels()
 {
     ImGui::PushFont(Font::italic());
-    ImGuiExtras::markdown("*Use your knob / fader / button and you will see the value changing in the histograms below. You can then hover it to see the index that you need to specify to select a MIDI channel.\nNOTE: if you want to use a Button, don't forget to change the Channel Kind on the MIDI node!*\n[Check out the tutorial for more details](https://coollab-art.com/Tutorials/VJ/MIDI)");
+    ImGuiExtras::markdown(Cool::tr("*Use your knob / fader / button and you will see the value changing in the histograms below. You can then hover it to see the index that you need to specify to select a MIDI channel.\nNOTE: if you want to use a Button, don't forget to change the Channel Kind on the MIDI node!*\n[Check out the tutorial for more details](https://coollab-art.com/Tutorials/VJ/MIDI)"));
     ImGui::PopFont();
 
     for (int k = 0; k < static_cast<int>(MidiChannelKind::COUNT); ++k)
@@ -337,9 +338,9 @@ void MidiManager::imgui_visualize_channels()
         imgui_reset_all(kind, label);
         ImGui::PopID();
     }
-    ImGui::TextUnformatted(fmt::format("Last button pressed: {}", all_values().last_button_pressed()).c_str());
-    ImGui::TextUnformatted(fmt::format("Last last button pressed: {}", all_values().last_last_button_pressed()).c_str());
-    ImGui::TextUnformatted(fmt::format("Time since last button pressed: {}", time_formatted_hms(all_values().time_since_last_button_pressed())).c_str());
+    ImGui::TextUnformatted(fmt::format(fmt::runtime(Cool::tr("Last button pressed: {}")), all_values().last_button_pressed()).c_str());
+    ImGui::TextUnformatted(fmt::format(fmt::runtime(Cool::tr("Last last button pressed: {}")), all_values().last_last_button_pressed()).c_str());
+    ImGui::TextUnformatted(fmt::format(fmt::runtime(Cool::tr("Time since last button pressed: {}")), time_formatted_hms(all_values().time_since_last_button_pressed())).c_str());
 }
 
 void MidiManager::imgui_reset_all(MidiChannelKind kind, std::string_view label)
@@ -356,7 +357,7 @@ void MidiManager::imgui_controllers_dropdown()
 
     try
     {
-        if (ImGui::BeginCombo("Controller", _port_name.c_str()))
+        if (ImGui::BeginCombo(Cool::i18n::label("Controller").c_str(), _port_name.c_str()))
         {
             for (unsigned int i = 0; i < _midi->getPortCount(); ++i)
             {
@@ -389,7 +390,7 @@ void MidiManager::imgui_emulate_midi_keyboard()
             ImGui::SameLine();
         ImGui::PopID();
     }
-    ImGui::TextUnformatted("Buttons:");
+    ImGui::TextUnformatted(Cool::tr("Buttons:"));
     for (int i = 0; i < buttons_count; ++i)
     {
         ImGui::SameLine();
@@ -405,15 +406,15 @@ void MidiManager::imgui_emulate_midi_keyboard()
             midi_callback(0., &message, this);
         }
     }
-    if (ImGui::Button("Add fader"))
+    if (ImGui::Button(Cool::i18n::label("Add fader").c_str()))
         values.push_back(0.f);
     ImGui::SameLine();
-    if (ImGui::Button("Remove fader") && !values.empty())
+    if (ImGui::Button(Cool::i18n::label("Remove fader").c_str()) && !values.empty())
         values.pop_back();
-    if (ImGui::Button("Add button"))
+    if (ImGui::Button(Cool::i18n::label("Add button").c_str()))
         buttons_count++;
     ImGui::SameLine();
-    if (ImGui::Button("Remove button") && buttons_count > 0)
+    if (ImGui::Button(Cool::i18n::label("Remove button").c_str()) && buttons_count > 0)
         buttons_count--;
 }
 

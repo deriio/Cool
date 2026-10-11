@@ -1,4 +1,5 @@
 #include "AudioInput_Device.h"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras.h"
 #include "ImGuiNotify/ImGuiNotify.hpp"
 
@@ -67,7 +68,7 @@ void AudioInput_Device::update()
                 _notification_id,
                 {
                     .type     = ImGuiNotify::Type::Error,
-                    .title    = "Audio Device",
+                    .title    = Cool::tr("Audio Device"),
                     .content  = fmt::format("Invalid device \"{}\"", device_name),
                     .duration = std::nullopt,
                     .closable = false,
@@ -118,7 +119,7 @@ auto AudioInput_Device::imgui(bool needs_to_highlight_error) -> bool
     Cool::ImGuiExtras::bring_attention_if(
         needs_to_highlight_error,
         [&]() {
-            if (ImGui::BeginCombo("Input device", current_device_display_name().c_str()))
+            if (ImGui::BeginCombo(Cool::i18n::label("Input device").c_str(), current_device_display_name().c_str()))
             {
                 // Only enumerate the devices while the dropdown is open: device_ids() does a full WASAPI
                 // device probe, which is far too expensive to run on every frame.
@@ -153,7 +154,7 @@ auto AudioInput_Device::imgui(bool needs_to_highlight_error) -> bool
             }
         }
     );
-    b |= ImGui::DragFloat("Volume Amplifier", &_volume, 0.03f, 0.f, 1000000.f);
+    b |= ImGui::DragFloat(Cool::i18n::label("Volume Amplifier").c_str(), &_volume, 0.03f, 0.f, 1000000.f);
     return b;
 }
 

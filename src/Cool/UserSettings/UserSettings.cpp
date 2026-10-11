@@ -1,4 +1,5 @@
 #include "UserSettings.h"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras.h"
 #include "Cool/ImGui/apply_imgui_style_scale.hpp"
 #include "Cool/Input/CTRL_OR_CMD.hpp"
@@ -13,17 +14,18 @@ auto UserSettings::imgui() -> bool
 {
     bool b = false;
 
-    ImGuiExtras::separator_text("Autosave");
+    ImGuiExtras::separator_text(Cool::tr("Autosave"));
     b |= imgui_autosave();
 
-    ImGuiExtras::separator_text("UI");
+    ImGuiExtras::separator_text(Cool::tr("UI"));
+    b |= i18n::imgui_language_selector();
     b |= imgui_ui_zoom();
     b |= imgui_extra_icons();
 
-    ImGuiExtras::separator_text("Camera");
+    ImGuiExtras::separator_text(Cool::tr("Camera"));
     b |= imgui_camera2D_zoom_sensitivity();
 
-    ImGuiExtras::separator_text("Miscellaneous");
+    ImGuiExtras::separator_text(Cool::tr("Miscellaneous"));
     b |= imgui_single_click_to_input_in_drag_widgets();
     b |= imgui_enable_multi_viewport();
 
@@ -34,8 +36,8 @@ auto UserSettings::imgui() -> bool
 
 auto UserSettings::imgui_autosave() -> bool
 {
-    return ImGuiExtras::toggle_with_submenu("Autosave", &autosave_enabled, [&]() {
-        bool const b = imgui_drag_time("Delay", &autosave_delay, imgui_drag_time_params{.show_milliseconds = false, .min = 1.});
+    return ImGuiExtras::toggle_with_submenu(Cool::i18n::label("Autosave").c_str(), &autosave_enabled, [&]() {
+        bool const b = imgui_drag_time(Cool::i18n::label("Delay").c_str(), &autosave_delay, imgui_drag_time_params{.show_milliseconds = false, .min = 1.});
         if (b)
             autosave_delay = Time::seconds(smart::keep_above(1., autosave_delay.as_seconds_double())); // Make sure the delay is at least 1 second, to avoid lagging
         return b;
@@ -44,19 +46,19 @@ auto UserSettings::imgui_autosave() -> bool
 
 auto UserSettings::imgui_extra_icons() -> bool
 {
-    bool const b = ImGuiExtras::toggle("Extra Icons", &extra_icons);
-    ImGuiExtras::help_marker("Adds additional icons for some menus, buttons, etc.");
+    bool const b = ImGuiExtras::toggle(Cool::i18n::label("Extra Icons").c_str(), &extra_icons);
+    ImGuiExtras::help_marker(Cool::tr("Adds additional icons for some menus, buttons, etc."));
     return b;
 }
 
 auto UserSettings::imgui_camera2D_zoom_sensitivity() -> bool
 {
-    return ImGui::SliderFloat("Camera 2D zoom sensitivity", &camera2D_zoom_sensitivity, 1.001f, 1.2f);
+    return ImGui::SliderFloat(Cool::i18n::label("Camera 2D zoom sensitivity").c_str(), &camera2D_zoom_sensitivity, 1.001f, 1.2f);
 }
 
 auto UserSettings::imgui_single_click_to_input_in_drag_widgets() -> bool
 {
-    bool const b = ImGuiExtras::toggle("Single-click to input in \"Drag number\" widgets.", &single_click_to_input_in_drag_widgets);
+    bool const b = ImGuiExtras::toggle(Cool::i18n::label("Single-click to input in \"Drag number\" widgets.").c_str(), &single_click_to_input_in_drag_widgets);
     ImGuiExtras::help_marker("When disabled, you need to double-click or " CTRL_OR_CMD "+click on a \"Drag number\" widget to be able to write down a specific value.");
     return b;
 }
@@ -79,7 +81,7 @@ auto UserSettings::imgui_enable_multi_viewport() -> bool
     std::optional<std::string> const reason = multi_viewport_disabled_reason();
     Cool::ImGuiExtras::disabled_if(reason, [&]() {
         static bool dummy{false}; // We always want to display it as off if we cannot enable it
-        b = ImGuiExtras::toggle("Enable multi-viewport", reason.has_value() ? &dummy : &enable_multi_viewport);
+        b = ImGuiExtras::toggle(Cool::i18n::label("Enable multi-viewport").c_str(), reason.has_value() ? &dummy : &enable_multi_viewport);
     });
     ImGuiExtras::help_marker(
         "When enabled, allows you to drag windows outside of the main window."
@@ -102,7 +104,7 @@ static constexpr float max_ui_zoom = 2.f;
 
 auto UserSettings::imgui_ui_zoom() -> bool
 {
-    auto const b = ImGui::DragFloat("UI Zoom", &ui_zoom, 0.001f, min_ui_zoom, max_ui_zoom, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
+    auto const b = ImGui::DragFloat(Cool::i18n::label("UI Zoom").c_str(), &ui_zoom, 0.001f, min_ui_zoom, max_ui_zoom, "%.3f", ImGuiSliderFlags_Logarithmic | ImGuiSliderFlags_AlwaysClamp);
     if (ImGui::IsItemActivated())
         _ui_scale_at_the_beginning_of_preview = Cool::ui_scale();
     if (ImGui::IsItemDeactivatedAfterEdit())
@@ -120,10 +122,10 @@ void UserSettings::change_ui_zoom(float delta)
         _notif_ui_zoom,
         {
             .type                 = ImGuiNotify::Type::Info,
-            .title                = "UI Zoom",
+            .title                = Cool::tr("UI Zoom"),
             .custom_imgui_content = [](ImGuiNotify::NotificationId const& this_notification_id) {
                 ImGui::TextUnformatted(fmt::format("{:.3f}", Cool::user_settings().ui_zoom).c_str());
-                if (ImGui::Button("Reset"))
+                if (ImGui::Button(Cool::i18n::label("Reset").c_str()))
                 {
                     Cool::user_settings().set_ui_zoom(1.f);
                     ImGuiNotify::close_immediately(this_notification_id);

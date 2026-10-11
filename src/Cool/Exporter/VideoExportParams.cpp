@@ -1,4 +1,5 @@
 #include "VideoExportParams.h"
+#include "Cool/i18n/i18n.hpp"
 #include <imgui.h>
 #include <cstdint>
 #include "Cool/ImGui/IcoMoonCodepoints.h"
@@ -19,7 +20,7 @@ static auto frames_to_time(int64_t frame, double fps) -> Time
 
 void VideoExportParams::imgui()
 {
-    ImGui::Text("Framerate");
+    ImGui::Text(Cool::tr("Framerate"));
     ImGui::SameLine();
     ImGui::InputScalar("##FPS", ImGuiDataType_Double, &fps, nullptr, nullptr, "%.2f fps");
 
@@ -27,11 +28,11 @@ void VideoExportParams::imgui()
     if (input_as_time_instead_of_frames)
     {
         ImGui::PushItemWidth(0.4f * (ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Fromto").x));
-        ImGui::Text("From");
+        ImGui::Text(Cool::tr("From"));
         ImGui::SameLine();
         imgui_drag_time("##beginning", &beginning);
         ImGui::SameLine();
-        ImGui::Text("to");
+        ImGui::Text(Cool::tr("to"));
         ImGui::SameLine();
         imgui_drag_time("##end", &end);
         ImGui::PopItemWidth();
@@ -39,7 +40,7 @@ void VideoExportParams::imgui()
     else
     {
         ImGui::PushItemWidth(ImGui::CalcTextSize(std::to_string(ORIGIN_OF_FRAMES).c_str()).x + 2.f * ImGui::GetStyle().FramePadding.x);
-        ImGui::Text("From");
+        ImGui::Text(Cool::tr("From"));
         ImGui::SameLine();
         {
             int64_t beginning_frame = time_to_frames(beginning, fps);
@@ -47,7 +48,7 @@ void VideoExportParams::imgui()
                 beginning = frames_to_time(beginning_frame, fps);
         }
         ImGui::SameLine();
-        ImGui::Text("to");
+        ImGui::Text(Cool::tr("to"));
         ImGui::SameLine();
         {
             int64_t end_frame = time_to_frames(end, fps);
@@ -55,13 +56,13 @@ void VideoExportParams::imgui()
                 end = frames_to_time(end_frame, fps);
         }
         ImGui::SameLine();
-        ImGui::Text("frames");
+        ImGui::Text(Cool::tr("frames"));
         ImGui::PopItemWidth();
     }
     ImGui::SameLine();
     if (ImGuiExtras::button_with_text_icon(ICOMOON_STACK))
         input_as_time_instead_of_frames = !input_as_time_instead_of_frames;
-    ImGui::SetItemTooltip("Switch units (Time or Frames)");
+    ImGui::SetItemTooltip(Cool::tr("Switch units (Time or Frames)"));
 }
 
-} // namespace Cool
+} // namespace Cool

@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "View.h"
 #include "Cool/DebugOptions/DebugOptions.h"
 #include "Cool/ImGui/ImGuiExtras.h"
@@ -59,9 +60,9 @@ void View::imgui_window(ViewWindowParams const& params)
         bool* const            p_open = _is_closable ? &_is_open : nullptr;
         ImGuiWindowFlags const flags  = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | (_is_output_view ? ImGuiWindowFlags_NoTitleBar : 0);
         if (params.fullscreen)
-            ImGuiExtras::begin_fullscreen(_name.c_str(), p_open, flags);
+            ImGuiExtras::begin_fullscreen(i18n::window_title(_name).c_str(), p_open, flags);
         else
-            ImGui::Begin(_name.c_str(), p_open, flags);
+            ImGui::Begin(i18n::window_title(_name).c_str(), p_open, flags);
     }
     ImGui::PopStyleVar();
     if (_need_to_toggle_fullscreen)
@@ -87,9 +88,9 @@ void View::imgui_window(ViewWindowParams const& params)
     {
         if (ImGui::BeginPopupContextItem("##close"))
         {
-            if (ImGui::Button("Toggle Fullscreen (F10)"))
+            if (ImGui::Button(Cool::i18n::label("Toggle Fullscreen (F10)").c_str()))
                 toggle_fullscreen();
-            if (ImGui::Button("Close window"))
+            if (ImGui::Button(Cool::i18n::label("Close window").c_str()))
                 close();
             ImGui::EndPopup();
         }
@@ -258,4 +259,4 @@ auto View::aspect_ratio() const -> float
     return img::aspect_ratio(*_window_size);
 }
 
-} // namespace Cool
+} // namespace Cool

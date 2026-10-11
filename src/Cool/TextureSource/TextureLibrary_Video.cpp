@@ -1,4 +1,5 @@
 #include "TextureLibrary_Video.h"
+#include "Cool/i18n/i18n.hpp"
 #include <chrono>
 #include <filesystem>
 #include <optional>
@@ -81,7 +82,7 @@ void TextureLibrary_Video::imgui_debug_view() const
             if (maybe_tex)
                 ImGuiExtras::image_framed(maybe_tex->imgui_texture_id(), {100.f * maybe_tex->aspect_ratio(), 100.f}, {.frame_thickness = 2.f, .flip_y = maybe_tex->need_to_flip_y()});
             else
-                ImGui::TextUnformatted("INVALID");
+                ImGui::TextUnformatted(Cool::tr("INVALID"));
         }
         ImGui::SameLine();
         ImGui::BeginGroup(); // So that the two texts are on the right of the image
@@ -97,7 +98,7 @@ void TextureLibrary_Video::imgui_debug_view() const
             }
             else
             {
-                ImGui::TextUnformatted(fmt::format("Expired (Not used for {})", time_to_live).c_str());
+                ImGui::TextUnformatted(fmt::format(fmt::runtime(Cool::tr("Expired (Not used for {})")), time_to_live).c_str());
             }
         }
         ImGui::EndGroup();

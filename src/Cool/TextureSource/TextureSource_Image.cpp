@@ -1,4 +1,5 @@
 #include "TextureSource_Image.h"
+#include "Cool/i18n/i18n.hpp"
 #include <open/open.hpp>
 #include "Cool/Gpu/Texture.h"
 #include "Cool/ImGui/ImGuiExtras.h"
@@ -27,10 +28,10 @@ auto TextureSource_Image::get_error_notification() const -> std::optional<ImGuiN
 
     return ImGuiNotify::Notification{
         .type                 = ImGuiNotify::Type::Error,
-        .title                = "Image error",
+        .title                = Cool::tr("Image error"),
         .content              = fmt::format("\"{}\"\n\n{}", Cool::File::weakly_canonical(absolute_path), *err),
         .custom_imgui_content = [path = absolute_path](auto&&) {
-            if (ImGui::Button("Try to open file in explorer"))
+            if (ImGui::Button(Cool::i18n::label("Try to open file in explorer").c_str()))
                 Cool::open_focused_in_explorer(path);
         },
         .duration = std::nullopt,

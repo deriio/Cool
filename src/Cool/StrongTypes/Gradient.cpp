@@ -1,4 +1,5 @@
 #include "Gradient.h"
+#include "Cool/i18n/i18n.hpp"
 #include <imgui.h>
 #include "Cool/ImGui/IcoMoonCodepoints.h"
 #include "Cool/ImGui/ImGuiExtras.h"
@@ -32,7 +33,7 @@ auto imgui_widget(std::string_view name, Cool::Gradient& gradient, bool should_u
     ImGui::SameLine();
     modified |= ImGG::wrap_mode_widget("##Wrap Mode", &gradient.wrap_mode);
     ImGui::SameLine();
-    if (ImGui::Button("Equalize"))
+    if (ImGui::Button(Cool::i18n::label("Equalize").c_str()))
     {
         gradient.value.gradient().distribute_marks_evenly();
         modified = true;

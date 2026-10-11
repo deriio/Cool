@@ -1,4 +1,5 @@
 #include "ColorPalette.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/IcoMoonCodepoints.h>
 #include <Cool/ImGui/ImGuiExtras.h>
 #include <imgui/imgui_internal.h>
@@ -73,8 +74,8 @@ auto imgui_widget(std::string_view name, Cool::ColorPalette& palette, ImGuiColor
         palette.value[palette.value.size() - 1] = Color::from_srgb(srgb);
         ImGui::EndPopup();
     }
-    ImGui::SetItemTooltip("%s", "Add a color");
-    ImGui::SetItemTooltip("%s", "Remove a color by middle click on it");
+    ImGui::SetItemTooltip("%s", Cool::tr("Add a color"));
+    ImGui::SetItemTooltip("%s", Cool::tr("Remove a color by middle click on it"));
 
     return value_has_changed;
 }

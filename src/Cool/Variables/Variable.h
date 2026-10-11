@@ -1,4 +1,5 @@
 #pragma once
+#include "Cool/i18n/i18n.hpp"
 
 namespace Cool {
 
@@ -51,6 +52,8 @@ public:
     {}
 
     auto name() const -> std::string const& { return _name; }
+    /// The translated name, to be used as the label of ImGui widgets. The ImGui ID stays the same regardless of the language.
+    auto label() const -> std::string { return fmt::format("{}###{}", i18n::tr_input(_name), _name); }
     auto value() const -> T const& { return _value; }
     auto value() -> T& { return _value; }
     auto metadata() const -> VariableMetadata<T> const& { return _metadata; }

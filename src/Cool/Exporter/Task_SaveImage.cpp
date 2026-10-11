@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "Task_SaveImage.hpp"
 #include <open/open.hpp>
 #include "Cool/Image/SaveImage.h"
@@ -34,7 +35,7 @@ auto Task_SaveImage::notification_after_execution_completes() const -> ImGuiNoti
     {
         auto success_notification                 = TaskWithProgressBar::notification_after_execution_completes();
         success_notification.custom_imgui_content = [path = _file_path](auto&&) {
-            if (ImGui::Button(fmt::format("Open in file explorer").c_str()))
+            if (ImGui::Button(Cool::tr("Open in file explorer")))
                 open_focused_in_explorer(path);
         };
         return success_notification;

@@ -1,4 +1,5 @@
 #include "ClockU.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/Icons/Icons.h>
 #include <Cool/ImGui/ImGuiExtras.h>
 #include <imgui.h>
@@ -21,7 +22,7 @@ void imgui_timeline(Cool::Clock& clock, std::function<void()> const& extra_widge
             on_time_reset();
         }
         ImGui::PopStyleVar();
-        ImGui::SetItemTooltip("%s", "Reset time to 0");
+        ImGui::SetItemTooltip("%s", Cool::tr("Reset time to 0"));
 
         ImGuiExtras::join_buttons();
 

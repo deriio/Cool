@@ -1,4 +1,5 @@
 #include "SpoutOutManager.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras.h"
 
 namespace Cool {
@@ -54,7 +55,7 @@ void SpoutOutManager::imgui_window()
     // Active
 #if defined(COOL_SPOUT)
         bool is_active = _sender.has_value();
-        if (Cool::ImGuiExtras::toggle("Active", &is_active))
+        if (Cool::ImGuiExtras::toggle(Cool::i18n::label("Active").c_str(), &is_active))
             create_or_destroy_sender(is_active);
 #else
         bool        is_active = false;
@@ -67,7 +68,7 @@ void SpoutOutManager::imgui_window()
             "Spout and Syphon are not supported yet";
 #endif
         Cool::ImGuiExtras::disabled_if(true, disable_reason, [&]() {
-            Cool::ImGuiExtras::toggle("Active", &is_active);
+            Cool::ImGuiExtras::toggle(Cool::i18n::label("Active").c_str(), &is_active);
         });
 #endif
 
@@ -75,7 +76,7 @@ void SpoutOutManager::imgui_window()
         _export_size.imgui();
 
         // Name
-        if (ImGui::InputText("Name", &_sender_name))
+        if (ImGui::InputText(Cool::i18n::label("Name").c_str(), &_sender_name))
         {
 #if defined(COOL_SPOUT)
             if (_sender.has_value())

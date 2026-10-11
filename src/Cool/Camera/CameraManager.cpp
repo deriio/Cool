@@ -1,4 +1,5 @@
 #include "CameraManager.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/Camera/hook_events.h>
 #include "ViewController_OrbitalU.h"
 
@@ -23,15 +24,15 @@ void CameraManager::reset_transform()
 void CameraManager::imgui()
 {
     _view_controller.ImGui(_camera);
-    if (ImGui::Button("Look at the origin"))
+    if (ImGui::Button(Cool::i18n::label("Look at the origin").c_str()))
     {
         _view_controller.set_orbit_center({0, 0, 0}, _camera);
     }
-    if (ImGui::Button("Reset transform"))
+    if (ImGui::Button(Cool::i18n::label("Reset transform").c_str()))
     {
         reset_transform();
     }
     Cool::imgui(_camera.projection());
 }
 
-} // namespace Cool
+} // namespace Cool

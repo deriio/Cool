@@ -5,7 +5,7 @@ namespace Cool {
 
 auto imgui_widget(Variable<glm::mat2>& var) -> bool
 {
-    return internal::imgui_widget(var.name().c_str(), &var.value(), var.metadata().bounds);
+    return internal::imgui_widget(var.label().c_str(), &var.value(), var.metadata().bounds);
 }
 
 auto imgui_widget(VariableMetadata<glm::mat2>& meta) -> bool

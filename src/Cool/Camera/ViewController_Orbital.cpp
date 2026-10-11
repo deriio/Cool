@@ -1,4 +1,5 @@
 #include "ViewController_Orbital.h"
+#include "Cool/i18n/i18n.hpp"
 #include "Camera.h"
 #include "CameraU.h"
 
@@ -26,7 +27,7 @@ bool ViewController_Orbital::ImGui(Camera& camera)
         assert(false);
         return 0;
     }();
-    auto const b = ImGui::Combo("Orbit Mode", &current_combo_item, " Turntable\0 Trackball\0 AxisFree\0\0");
+    auto const b = ImGui::Combo(Cool::i18n::label("Orbit Mode").c_str(), &current_combo_item, " Turntable\0 Trackball\0 AxisFree\0\0");
     if (b)
     {
         switch (current_combo_item)

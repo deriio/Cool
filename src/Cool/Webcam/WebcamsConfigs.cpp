@@ -1,4 +1,5 @@
 #include "WebcamsConfigs.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include "wcam/wcam.hpp"
 
 namespace Cool {
@@ -23,7 +24,7 @@ void WebcamsConfigs::imgui_window()
             ImGui::PushID(info.id.as_string().c_str());
             ImGui::SeparatorText(info.name.c_str());
             auto const selected_resolution = wcam::get_selected_resolution(info.id);
-            if (ImGui::BeginCombo("Resolution", wcam::to_string(selected_resolution).c_str()))
+            if (ImGui::BeginCombo(Cool::i18n::label("Resolution").c_str(), wcam::to_string(selected_resolution).c_str()))
             {
                 for (auto const& resolution : info.resolutions)
                 {

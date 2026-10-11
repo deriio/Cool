@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/ImGuiExtras.h>
 #include <stringify/stringify.hpp>
 
@@ -19,7 +20,7 @@ void Variable<T>::imgui_reset_buttons(ImGuiVariableCallbacks const& callbacks)
     if (_metadata != _default_metadata)
     {
         ImGui::SameLine();
-        if (ImGui::Button("Reset Metadata"))
+        if (ImGui::Button(Cool::i18n::label("Reset Metadata").c_str()))
         {
             _metadata = _default_metadata;
             callbacks.on_metadata_changed();

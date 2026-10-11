@@ -1,4 +1,5 @@
 #include "ImageSizeConstraint.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/ImGuiExtras.h>
 #include "compute_image_size.h"
 
@@ -25,7 +26,7 @@ auto ImageSizeConstraint::applied_to(img::Size frame_size) const -> img::Size
 auto ImageSizeConstraint::imgui_aspect_ratio() -> bool // NOLINT(*make-member-function-const)
 {
     bool b = false;
-    b |= ImGuiExtras::toggle("Auto", &_shared_aspect_ratio->fill_the_view);
+    b |= ImGuiExtras::toggle(Cool::i18n::label("Auto").c_str(), &_shared_aspect_ratio->fill_the_view);
     ImGuiExtras::disabled_if(_shared_aspect_ratio->fill_the_view, "Unselect \"Auto\" above if you want to control the aspect ratio manually", [&]() {
         b |= _shared_aspect_ratio->aspect_ratio.imgui();
     });
@@ -34,8 +35,8 @@ auto ImageSizeConstraint::imgui_aspect_ratio() -> bool // NOLINT(*make-member-fu
 
 auto ImageSizeConstraint::imgui_nb_pixels() -> bool
 {
-    return ImGuiExtras::toggle_with_submenu("Limit render size", &_is_controlling_nb_pixels, [&]() {
-        return ImGuiExtras::slider_uint32("Number of Pixels", &_nb_pixels, 10'000, 500'000);
+    return ImGuiExtras::toggle_with_submenu(Cool::i18n::label("Limit render size").c_str(), &_is_controlling_nb_pixels, [&]() {
+        return ImGuiExtras::slider_uint32(Cool::i18n::label("Number of Pixels").c_str(), &_nb_pixels, 10'000, 500'000);
     });
 }
 

@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/TextureSource/TextureLibrary_Image.h"
 #include <chrono>
 #include <filesystem>
@@ -105,7 +106,7 @@ void TextureLibrary_Image::imgui_debug_view() const
             if (time_since_last_use < time_to_live)
                 ImGui::TextUnformatted(time_formatted_hms(time_to_live - time_since_last_use).c_str());
             else
-                ImGui::TextUnformatted(fmt::format("Expired (Not used for {})", time_to_live).c_str());
+                ImGui::TextUnformatted(fmt::format(fmt::runtime(Cool::tr("Expired (Not used for {})")), time_to_live).c_str());
         }
         ImGui::EndGroup();
     }

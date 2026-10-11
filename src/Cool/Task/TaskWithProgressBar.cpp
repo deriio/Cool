@@ -1,4 +1,5 @@
 #include "TaskWithProgressBar.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras.h"
 #include "Cool/Task/TaskManager.hpp"
 #include "reg/reg.hpp"
@@ -22,7 +23,7 @@ auto TaskWithProgressBar::notification_while_in_progress() const -> ImGuiNotify:
         .custom_imgui_content = [data = _data, task_id = owner_id(), extra_imgui = extra_imgui_below_progress_bar()](ImGuiNotify::NotificationId const& notif_id) {
             ImGuiExtras::progress_bar(data->progress.load());
             extra_imgui(notif_id);
-            if (ImGui::Button("Cancel"))
+            if (ImGui::Button(Cool::i18n::label("Cancel").c_str()))
                 task_manager().cancel_all(task_id);
         },
         .duration = std::nullopt,
@@ -35,7 +36,7 @@ auto TaskWithProgressBar::notification_after_execution_completes() const -> ImGu
     return {
         .type     = ImGuiNotify::Type::Success,
         .title    = name(),
-        .content  = "Completed",
+        .content  = Cool::tr("Completed"),
         .duration = 2s,
     };
 }

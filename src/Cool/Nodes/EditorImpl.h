@@ -68,7 +68,7 @@ private:
 
 private:
     /// Returns the id of the node definition that we should create, or std::nullopt if no node should be created.
-    auto imgui_nodes_menu(NodesLibrary const&, MaybeDisableNodeDefinition const& maybe_disable, bool just_opened) -> std::optional<NodeDefinitionAndCategoryName>;
+    auto imgui_nodes_menu(NodesLibrary const&, MaybeDisableNodeDefinition const& maybe_disable, bool just_opened) -> std::optional<NodesMenuSelection>;
     auto wants_to_open_nodes_menu() const -> bool;
     void open_nodes_menu();
     void remove_all_links_connected_to_input_pin(PinId const& input_pin_id, NodesConfig& nodes_cfg);
@@ -84,6 +84,7 @@ private:
     ed::NodeId                       _id_of_node_whose_context_menu_is_open{};
     bool                             _menu_just_opened{false};
     Pin const*                       _pin_to_link_to_new_node = nullptr;
+    CheckNodeCompatibility           _check_compatibility{}; // Used to only show the nodes that can be plugged into _pin_to_link_to_new_node
     Pin const*                       _new_link_pin            = nullptr;
     bool                             _link_has_just_been_released{false}; // HACK because we can't open the nodes menu just after a link has been released (otherwise _next_node_position is wrong). So we have to delay the opening.
 

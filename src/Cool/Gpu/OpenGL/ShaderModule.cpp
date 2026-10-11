@@ -1,4 +1,5 @@
 #if defined(COOL_OPENGL)
+#include "Cool/i18n/i18n.hpp"
 #include "ShaderModule.h"
 #include "Cool/Exception/Exception.h"
 #include "Cool/Log/ErrorMessage.hpp"
@@ -32,8 +33,8 @@ static auto compile_shader_module(GLuint id, const ShaderDescription& desc) -> t
         return tl::make_unexpected(ErrorMessage{
             fmt::format("Preprocessing failed:\n{}\nThe source code we tried to preprocess was:\n{}", preprocessed_source.error(), desc.source_code),
             std::vector<ClipboardContent>{
-                {.title = "shader code", .content = desc.source_code},
-                {.title = "error message", .content = preprocessed_source.error()},
+                {.title = Cool::tr("shader code"), .content = desc.source_code},
+                {.title = Cool::tr("error message"), .content = preprocessed_source.error()},
             }
         });
 
@@ -46,8 +47,8 @@ static auto compile_shader_module(GLuint id, const ShaderDescription& desc) -> t
         return tl::make_unexpected(ErrorMessage{
             fmt::format("Compilation failed:\n{}\nThe source code we tried to compile was:\n{}", *err, *preprocessed_source),
             std::vector<ClipboardContent>{
-                {.title = "shader code", .content = *preprocessed_source},
-                {.title = "error message", .content = *err},
+                {.title = Cool::tr("shader code"), .content = *preprocessed_source},
+                {.title = Cool::tr("error message"), .content = *err},
             }
         });
     }

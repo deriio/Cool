@@ -1,12 +1,12 @@
 #include "VideoExportOverwriteBehaviour.h"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras.h"
 
 namespace Cool {
 
 auto imgui_widget(VideoExportOverwriteBehaviour& behaviour) -> bool
 {
-    bool const b = ImGui::Combo(
-        "Overwrite mode",
+    bool const b = ImGui::Combo(Cool::i18n::label("Overwrite mode").c_str(),
         reinterpret_cast<int*>(&behaviour), // NOLINT(*reinterpret-cast)
         "Ask before creating a new folder\0"
         "Ask before overwriting the previous frames\0"

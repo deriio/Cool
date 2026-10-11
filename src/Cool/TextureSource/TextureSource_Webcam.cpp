@@ -1,4 +1,5 @@
 #include "TextureSource_Webcam.h"
+#include "Cool/i18n/i18n.hpp"
 #include <wcam/wcam.hpp>
 #include "Cool/ImGui/IcoMoonCodepoints.h"
 #include "Cool/ImGui/ImGuiExtras.h"
@@ -27,9 +28,9 @@ auto TextureSource_Webcam::imgui_widget() -> bool
 
     if (ImGuiExtras::button_with_text_icon(ICOMOON_COG))
         WebcamsConfigs::instance().open_imgui_window();
-    ImGui::SetItemTooltip("%s", "Open webcam config to choose its resolution. This can help if the refresh rate of your webcam is too slow.");
+    ImGui::SetItemTooltip("%s", Cool::tr("Open webcam config to choose its resolution. This can help if the refresh rate of your webcam is too slow."));
 
-    if (ImGui::BeginCombo("Webcam", name.c_str()))
+    if (ImGui::BeginCombo(Cool::i18n::label("Webcam").c_str(), name.c_str()))
     {
         for (auto const& info : webcam_infos)
         {
@@ -68,7 +69,7 @@ auto TextureSource_Webcam::get_error_notification() const -> std::optional<ImGui
     auto const maybe_name = wcam::get_name(_device_id);
     return ImGuiNotify::Notification{
         .type     = ImGuiNotify::Type::Error,
-        .title    = "Webcam error",
+        .title    = Cool::tr("Webcam error"),
         .content  = maybe_name.has_value()
                         ? fmt::format("\"{}\"\n\n{}", *maybe_name, *err)
                         : fmt::format("{}", *err),

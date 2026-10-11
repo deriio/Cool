@@ -1,4 +1,5 @@
 #include "ServerManager.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include <imgui.h>
 #include "Cool/ImGui/Fonts.h"
 #include "Cool/ImGui/IcoMoonCodepoints.h"
@@ -30,9 +31,9 @@ void ServerManager::imgui_window()
         // Server state
         ImGui::PushFont(Font::italic());
         if (_server.has_value())
-            ImGui::TextUnformatted("The server is running");
+            ImGui::TextUnformatted(Cool::tr("The server is running"));
         else
-            ImGui::TextUnformatted("The server is closed");
+            ImGui::TextUnformatted(Cool::tr("The server is closed"));
         ImGui::PopFont();
         // Values
         osc_manager().imgui_show_all_values();

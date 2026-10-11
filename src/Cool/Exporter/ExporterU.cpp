@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "ExporterU.h"
 #include <memory>
 #include <open/open.hpp>
@@ -40,9 +41,9 @@ auto notification_after_video_export_success(std::filesystem::path const& path) 
 {
     return {
         .type                 = ImGuiNotify::Type::Success,
-        .title                = "Video Export Success",
+        .title                = Cool::tr("Video Export Success"),
         .custom_imgui_content = [path](auto&&) {
-            if (ImGui::Button(fmt::format("Open \"{}\" folder", Cool::File::file_name(path)).c_str()))
+            if (ImGui::Button(fmt::format(fmt::runtime(Cool::tr("Open \"{}\" folder")), Cool::File::file_name(path)).c_str()))
                 open_folder_in_explorer(path);
         },
     };
@@ -52,10 +53,10 @@ auto notification_after_video_export_failure(std::filesystem::path const& path, 
 {
     return {
         .type                 = ImGuiNotify::Type::Error,
-        .title                = "Video Export Failed",
+        .title                = Cool::tr("Video Export Failed"),
         .content              = error_message,
         .custom_imgui_content = [path](auto&&) {
-            if (ImGui::Button(fmt::format("Open \"{}\" folder", Cool::File::file_name(path)).c_str()))
+            if (ImGui::Button(fmt::format(fmt::runtime(Cool::tr("Open \"{}\" folder")), Cool::File::file_name(path)).c_str()))
                 open_folder_in_explorer(path);
         },
     };
@@ -65,9 +66,9 @@ auto notification_after_video_export_canceled(std::filesystem::path const& path)
 {
     return {
         .type                 = ImGuiNotify::Type::Warning,
-        .title                = "Video Export Canceled",
+        .title                = Cool::tr("Video Export Canceled"),
         .custom_imgui_content = [path](auto&&) {
-            if (ImGui::Button(fmt::format("Open \"{}\" folder", Cool::File::file_name(path)).c_str()))
+            if (ImGui::Button(fmt::format(fmt::runtime(Cool::tr("Open \"{}\" folder")), Cool::File::file_name(path)).c_str()))
                 open_folder_in_explorer(path);
         },
     };

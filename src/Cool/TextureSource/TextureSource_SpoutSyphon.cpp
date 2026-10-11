@@ -1,4 +1,5 @@
 #include "TextureSource_SpoutSyphon.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras_dropdown.hpp"
 #include "TextureLibrary_Spout.hpp"
 
@@ -24,7 +25,7 @@ auto TextureSource_SpoutSyphon::imgui_widget() -> bool
 {
     init_sender_name_ifn();
 #if defined(COOL_SPOUT)
-    return ImGuiExtras::dropdown("Spout Sender", &_sender_name, texture_library_spout().get_sender_names());
+    return ImGuiExtras::dropdown(Cool::i18n::label("Spout Sender").c_str(), &_sender_name, texture_library_spout().get_sender_names());
 #else
     return false;
 #endif
@@ -67,7 +68,7 @@ auto TextureSource_SpoutSyphon::get_error_notification() const -> std::optional<
 #endif
     return ImGuiNotify::Notification{
         .type     = ImGuiNotify::Type::Error,
-        .title    = "Spout/Syphon error",
+        .title    = Cool::tr("Spout/Syphon error"),
         .content  = error_message,
         .duration = std::nullopt,
         .closable = false,

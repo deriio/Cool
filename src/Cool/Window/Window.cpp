@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "Cool/i18n/i18n.hpp"
 #include "Cool/ImGui/ImGuiExtras.h"
 
 namespace Cool {
@@ -103,7 +104,7 @@ void Window::set_visibility(bool is_visible)
 auto Window::imgui_cap_framerate() -> bool
 {
     bool       should_cap_framerate = framerate_is_capped();
-    bool const checkbox_triggered   = ImGuiExtras::toggle("Capped Framerate", &should_cap_framerate);
+    bool const checkbox_triggered   = ImGuiExtras::toggle(Cool::i18n::label("Capped Framerate").c_str(), &should_cap_framerate);
     if (checkbox_triggered)
         cap_framerate_if(should_cap_framerate);
     return checkbox_triggered;

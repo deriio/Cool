@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "ExporterGui.h"
 #include "Cool/File/File.h"
 #include "Cool/File/PathChecks.hpp"
@@ -48,10 +49,10 @@ void ExporterGui::imgui_menu_items(exporter_imgui_menu_items_Params const& p, st
 {
     // Calculate max button width
     if (!longest_text)
-        longest_text = icon_fmt("Video", ICOMOON_FILM, true);
+        longest_text = icon_fmt(Cool::tr("Video"), ICOMOON_FILM, true);
     float const button_width = ImGui::CalcTextSize(longest_text->c_str()).x + 2.f * ImGui::GetStyle().FramePadding.x;
     // Draw buttons
-    if (ImGui::Button(icon_fmt("Image", ICOMOON_IMAGE, true).c_str(), ImVec2(button_width, 0.0f)))
+    if (ImGui::Button(icon_fmt(Cool::tr("Image"), ICOMOON_IMAGE, true).c_str(), ImVec2(button_width, 0.0f)))
     {
         if (p.open_image_exporter)
             (*p.open_image_exporter)();
@@ -60,7 +61,7 @@ void ExporterGui::imgui_menu_items(exporter_imgui_menu_items_Params const& p, st
             _image_export_window.open();
         }
     }
-    if (ImGui::Button(icon_fmt("Video", ICOMOON_FILM, true).c_str(), ImVec2(button_width, 0.0f)))
+    if (ImGui::Button(icon_fmt(Cool::tr("Video"), ICOMOON_FILM, true).c_str(), ImVec2(button_width, 0.0f)))
     {
         if (p.open_video_exporter)
             (*p.open_video_exporter)();
@@ -80,7 +81,7 @@ void ExporterGui::imgui_window_export_image(Polaroid polaroid, Time time, Time d
         ImGuiExtras::file_and_folder_saving(image_file_path_beeing_edited_in_ui(), image_extensions, path_checks, NfdFileFilter::ImageSave);
         // Validation
         ImGuiExtras::before_export_button(image_export_path(), path_checks);
-        if (ImGui::Button(icon_fmt("Export", ICOMOON_UPLOAD2).c_str()))
+        if (ImGui::Button(icon_fmt(Cool::tr("Export"), ICOMOON_UPLOAD2).c_str()))
         {
             auto const path = image_export_path();
             if (ExporterU::user_accepted_to_ignore_warnings(path, path_checks))
@@ -145,7 +146,7 @@ auto ExporterGui::begin_video_export(std::optional<VideoExportProcess>& video_ex
 
     if (!File::create_folders_if_they_dont_exist(folder_path_for_video()))
     {
-        ImGuiNotify::send(ExporterU::notification_after_video_export_failure(folder_path_for_video(), "Maybe you are not allowed to save files in this folder?"));
+        ImGuiNotify::send(ExporterU::notification_after_video_export_failure(folder_path_for_video(), Cool::tr("Maybe you are not allowed to save files in this folder?")));
         return false;
     }
 
@@ -172,7 +173,7 @@ void ExporterGui::imgui_window_export_video(std::function<void()> const& widgets
 {
     if (is_exporting(video_export_process))
     {
-        ImGui::Begin(icon_fmt("Video export in progress", ICOMOON_FILM, true).c_str());
+        ImGui::Begin(i18n::window_title(icon_fmt("Video export in progress", ICOMOON_FILM, true)).c_str());
         video_export_process->imgui(widgets_in_window_video_export_in_progress);
         ImGui::End();
     }
@@ -180,12 +181,12 @@ void ExporterGui::imgui_window_export_video(std::function<void()> const& widgets
     {
         _video_export_window.show([&](bool /*is_opening*/) {
             _export_size.imgui();
-            ImGuiExtras::folder("Folder", &folder_path_for_video());
+            ImGuiExtras::folder(Cool::i18n::label("Folder").c_str(), &folder_path_for_video());
             _video_export_params.imgui();
             imgui_widget(user_settings().video_export_overwrite_behaviour);
             // Validation
             ImGuiExtras::before_export_button();
-            if (ImGui::Button(icon_fmt("Start exporting", ICOMOON_UPLOAD2).c_str()))
+            if (ImGui::Button(icon_fmt(Cool::tr("Start exporting"), ICOMOON_UPLOAD2).c_str()))
             {
                 if (begin_video_export(video_export_process, time_speed, on_video_export_start))
                     _video_export_window.close();

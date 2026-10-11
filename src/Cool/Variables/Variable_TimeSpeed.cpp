@@ -6,7 +6,7 @@ namespace Cool {
 auto imgui_widget(Variable<TimeSpeed>& var) -> bool
 {
     return imgui_widget(
-        var.name().c_str(), &var.value(), var.metadata().drag_speed,
+        var.label().c_str(), &var.value(), var.metadata().drag_speed,
         var.metadata().has_min_bound ? var.metadata().min : -DBL_MAX,
         var.metadata().has_max_bound ? var.metadata().max : +DBL_MAX
     );

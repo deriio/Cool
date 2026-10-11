@@ -5,7 +5,7 @@ namespace Cool {
 
 auto imgui_widget(Variable<bool>& var) -> bool
 {
-    return ImGuiExtras::toggle(var.name().c_str(), &var.value());
+    return ImGuiExtras::toggle(var.label().c_str(), &var.value());
 }
 
 auto imgui_widget(VariableMetadata<bool>&) -> bool

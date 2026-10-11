@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "export_mesh.hpp"
 #include <fstream>
 #include "Cool/File/File.h"
@@ -33,7 +34,7 @@ void export_mesh(Mesh const& mesh, MeshExportSettings const& settings)
     {
         ImGuiNotify::send({
             .type    = ImGuiNotify::Type::Warning,
-            .title   = "3D Model Export",
+            .title   = Cool::tr("3D Model Export"),
             .content = fmt::format("Failed to create the folder \"{}\"", Cool::File::weakly_canonical(settings.path)),
         });
         return;

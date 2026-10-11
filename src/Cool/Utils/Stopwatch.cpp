@@ -1,4 +1,5 @@
 #include "Stopwatch.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include <numeric>
 #include "Cool/ImGui/Fonts.h"
 #include "imgui.h"
@@ -50,7 +51,7 @@ void Stopwatch::imgui_plot()
             _times_when_paused.clear();
     }
     ImGui::SameLine();
-    if (ImGui::InputScalar("Samples count", ImGuiDataType_U64, &_samples_count))
+    if (ImGui::InputScalar(Cool::i18n::label("Samples count").c_str(), ImGuiDataType_U64, &_samples_count))
         _times.clear();
 }
 

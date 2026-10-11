@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "MessageConsole.h"
 #include "Cool/ImGui/Fonts.h"
 #include "Cool/ImGui/ImGuiExtras.h"
@@ -196,7 +197,7 @@ void MessageConsole::show_number_of_messages_of_given_type(MessageType type)
         if (ImGui::BeginPopupContextItem(to_string(type).c_str()))
         {
             ImGuiExtras::disabled_if(!there_are_clearable_messages(type), reason_for_disabling_clear_button, [&] {
-                if (ImGui::Button("Clear"))
+                if (ImGui::Button(Cool::i18n::label("Clear").c_str()))
                     clear(type);
             });
 
@@ -232,7 +233,7 @@ void MessageConsole::imgui_window()
         {
             ImGui::SetNextWindowToFront();
         }
-        ImGui::Begin(_name.c_str(), nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
+        ImGui::Begin(i18n::window_title(_name).c_str(), nullptr, ImGuiWindowFlags_NoFocusOnAppearing);
 
         // Menu bar
         ImGuiExtras::background(
@@ -278,7 +279,7 @@ auto MessageConsole::there_are_clearable_messages(MessageType type) const -> boo
 void MessageConsole::imgui_menu_bar()
 {
     ImGuiExtras::disabled_if(!there_are_clearable_messages(), reason_for_disabling_clear_button, [&] {
-        if (ImGui::Button("Clear"))
+        if (ImGui::Button(Cool::i18n::label("Clear").c_str()))
             clear();
     });
 
@@ -289,7 +290,7 @@ void MessageConsole::imgui_menu_bar()
 
 static void imgui_button_copy_to_clipboard(ClipboardContent const& clipboard)
 {
-    if (ImGui::Button(fmt::format("Copy {} to clipboard", clipboard.title).c_str()))
+    if (ImGui::Button(fmt::format(fmt::runtime(Cool::tr("Copy {} to clipboard")), clipboard.title).c_str()))
     {
         ImGui::SetClipboardText(clipboard.content.c_str());
         ImGui::CloseCurrentPopup();
@@ -355,7 +356,7 @@ void MessageConsole::imgui_show_all_messages()
 
                     if (msg.message.clipboard_contents.empty())
                     {
-                        imgui_button_copy_to_clipboard({.title = "full message", .content = msg.message.content});
+                        imgui_button_copy_to_clipboard({.title = Cool::tr("full message"), .content = msg.message.content});
                     }
                     else
                     {

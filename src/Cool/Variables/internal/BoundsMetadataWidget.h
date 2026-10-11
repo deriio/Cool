@@ -1,4 +1,5 @@
 #pragma once
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/ImGuiExtras.h>
 #include <glm/gtc/matrix_access.hpp>
 #include "BoundsMetadata.h"
@@ -219,7 +220,7 @@ auto imgui_min_max_bounds(T& min, T& max, bool& has_min_bound, bool& has_max_bou
     }
 
     ImGui::SameLine();
-    ImGui::TextDisabled("to");
+    ImGui::TextDisabled(Cool::tr("to"));
     ImGui::SameLine();
 
     b |= ImGui::Checkbox("##4", &has_max_bound);
@@ -236,7 +237,7 @@ auto imgui_min_max_bounds(T& min, T& max, bool& has_min_bound, bool& has_max_bou
         });
     }
 
-    b |= ImGui::DragFloat("Drag speed", &drag_speed, 0.0001f, 0.000001f, biggest_number<float>(), "%.6f");
+    b |= ImGui::DragFloat(Cool::i18n::label("Drag speed").c_str(), &drag_speed, 0.0001f, 0.000001f, biggest_number<float>(), "%.6f");
 
     return b;
 }
@@ -250,7 +251,7 @@ auto imgui_widget(BoundsMetadata<T>& meta) -> bool
     {
         b |= imgui_drag("##1", &meta.min, 0.01f);
         ImGui::SameLine();
-        ImGui::TextUnformatted("to");
+        ImGui::TextUnformatted(Cool::tr("to"));
         ImGui::SameLine();
         b |= imgui_drag("##2", &meta.max, 0.01f);
     }
@@ -259,8 +260,8 @@ auto imgui_widget(BoundsMetadata<T>& meta) -> bool
         b |= imgui_min_max_bounds(meta.min, meta.max, meta.has_min_bound, meta.has_max_bound, meta.drag_speed);
     }
 
-    b |= ImGuiExtras::toggle("Use a slider", &meta.use_slider);
-    b |= ImGuiExtras::toggle("Is logarithmic", &meta.is_logarithmic);
+    b |= ImGuiExtras::toggle(Cool::i18n::label("Use a slider").c_str(), &meta.use_slider);
+    b |= ImGuiExtras::toggle(Cool::i18n::label("Is logarithmic").c_str(), &meta.is_logarithmic);
 
     return b;
 }

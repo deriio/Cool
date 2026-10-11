@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "NodesDefinitionUpdater.h"
 #include "Cool/Log/message_console.hpp"
 #include "Cool/Nodes/NodesCategoryConfig.h"
@@ -89,7 +90,7 @@ void NodesDefinitionUpdater::handle_error(std::filesystem::path const& definitio
         _errors[definition_path], // This will create an error id if not already present in the map. This is what we want.
         {
             .type    = MessageType::Error,
-            .title   = "Nodes",
+            .title   = Cool::tr("Nodes"),
             .content = fmt::format("Failed to read node \"{}\":\n{}", Cool::File::weakly_canonical(definition_path), message),
         }
     );

@@ -26,6 +26,7 @@ concept NodesConfig_Concept = requires(T const const_cfg, T cfg, size_t idx, Pin
     { const_cfg.copy_nodes() } -> std::convertible_to<std::string>;
     { cfg.paste_nodes("Some clipboard content") } -> std::convertible_to<bool>;
     { const_cfg.maybe_disable_node_definition() } -> std::convertible_to<MaybeDisableNodeDefinition>;
+    { const_cfg.check_node_compatibility(pin_const) } -> std::convertible_to<CheckNodeCompatibility>;
 }; // clang-format on
 
 class NodesConfig {
@@ -52,6 +53,8 @@ public:
     /// Returns true iff successfully pasted nodes
     auto paste_nodes(std::string_view clipboard_content) -> bool { return _pimpl->paste_nodes(clipboard_content); }
     auto maybe_disable_node_definition() const -> Cool::MaybeDisableNodeDefinition { return _pimpl->maybe_disable_node_definition(); }
+    /// Used when a link is dragged from `pin` and released on the workspace: the nodes menu only shows the nodes that can be plugged into that pin.
+    auto check_node_compatibility(Pin const& pin) const -> Cool::CheckNodeCompatibility { return _pimpl->check_node_compatibility(pin); }
 
 public: // Type-erasure implementation details
     template<NodesConfig_Concept NodesCfgT>
@@ -89,6 +92,7 @@ private:
         [[nodiscard]] virtual auto copy_nodes() const -> std::string                                                              = 0;
         virtual auto               paste_nodes(std::string_view clipboard_content) -> bool                                        = 0;
         virtual auto               maybe_disable_node_definition() const -> Cool::MaybeDisableNodeDefinition                      = 0;
+        virtual auto               check_node_compatibility(Pin const&) const -> Cool::CheckNodeCompatibility                     = 0;
     };
 
     template<NodesConfig_Concept NodesCfgT>
@@ -176,6 +180,10 @@ private:
         auto maybe_disable_node_definition() const -> Cool::MaybeDisableNodeDefinition override
         {
             return _cfg.maybe_disable_node_definition();
+        }
+        auto check_node_compatibility(Pin const& pin) const -> Cool::CheckNodeCompatibility override
+        {
+            return _cfg.check_node_compatibility(pin);
         }
 
         NodesCfgT _cfg;

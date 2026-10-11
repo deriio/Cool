@@ -1,4 +1,5 @@
 #include "VideoExportProcess.h"
+#include "Cool/i18n/i18n.hpp"
 #include <chrono>
 #include "Cool/ImGui/Fonts.h"
 #include "Cool/ImGui/ImGuiExtras.h"
@@ -134,14 +135,14 @@ void VideoExportProcess::imgui(std::function<void()> const& extra_widgets)
     );
     ImGui::TextUnformatted(time_formatted_hms(estimated_remaining_time()).c_str());
     ImGui::SameLine();
-    ImGui::TextUnformatted("remaining");
+    ImGui::TextUnformatted(Cool::tr("remaining"));
     ImGui::PopFont();
 
     // Stop exporting
-    if (ImGui::Button("Stop exporting"))
+    if (ImGui::Button(Cool::i18n::label("Stop exporting").c_str()))
         _should_stop_asap = true;
 
     extra_widgets();
 }
 
-} // namespace Cool
+} // namespace Cool

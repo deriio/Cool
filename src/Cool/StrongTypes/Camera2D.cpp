@@ -1,4 +1,5 @@
 #include "Camera2D.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/Icons/Icons.h>
 #include <Cool/ImGui/icon_fmt.h>
 #include <glm/gtx/matrix_transform_2d.hpp>
@@ -54,10 +55,10 @@ auto imgui_widget(std::string_view name, Camera2D& cam, int number_of_snaps, flo
     ImGui::BeginGroup();
     ImGui::PushID(name.data());
 
-    b |= ImGui::DragFloat2("Translation", glm::value_ptr(cam.translation), 0.01f);
-    b |= imgui_widget("Rotation", cam.rotation, number_of_snaps, snaps_offset, always_snap);
-    b |= ImGui::DragFloat("Zoom", &cam.zoom, 0.01f, 0.001f, FLT_MAX, "%.3f", ImGuiSliderFlags_Logarithmic);
-    if (ImGui::Button(icon_fmt("Reset Camera", ICOMOON_TARGET).c_str()))
+    b |= ImGui::DragFloat2(Cool::i18n::label("Translation").c_str(), glm::value_ptr(cam.translation), 0.01f);
+    b |= imgui_widget(Cool::i18n::label("Rotation").c_str(), cam.rotation, number_of_snaps, snaps_offset, always_snap);
+    b |= ImGui::DragFloat(Cool::i18n::label("Zoom").c_str(), &cam.zoom, 0.01f, 0.001f, FLT_MAX, "%.3f", ImGuiSliderFlags_Logarithmic);
+    if (ImGui::Button(icon_fmt(Cool::tr("Reset Camera"), ICOMOON_TARGET).c_str()))
     {
         cam = {};
         b   = true;

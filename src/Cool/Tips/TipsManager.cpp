@@ -1,3 +1,4 @@
+#include "Cool/i18n/i18n.hpp"
 #include "TipsManager.h"
 #include <imgui.h>
 #include <chrono>
@@ -74,10 +75,10 @@ void TipsManager::imgui_show_one_tip(Tips all_tips)
 
     auto const button_width = ImGui::GetContentRegionAvail().x / 2.f - ImGui::GetStyle().ItemSpacing.x / 2.f;
 
-    if (ImGui::Button("Previous tip", {button_width, 0.f}))
+    if (ImGui::Button(Cool::i18n::label("Previous tip").c_str(), {button_width, 0.f}))
         prepare_previous_tip();
     ImGui::SameLine();
-    if (ImGui::Button("Next tip", {button_width, 0.f}))
+    if (ImGui::Button(Cool::i18n::label("Next tip").c_str(), {button_width, 0.f}))
         prepare_next_tip();
 }
 
@@ -89,7 +90,7 @@ void TipsManager::imgui_windows(Tips all_tips)
 
     if (_show_all_tips)
     {
-        ImGui::Begin(Cool::icon_fmt("All tips", ICOMOON_BUBBLE).c_str(), &_show_all_tips);
+        ImGui::Begin(i18n::window_title(Cool::icon_fmt("All tips", ICOMOON_BUBBLE)).c_str(), &_show_all_tips);
         imgui_all_tips(all_tips);
         ImGui::End();
     }

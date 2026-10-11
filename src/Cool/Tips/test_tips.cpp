@@ -1,4 +1,5 @@
 #include "Cool/Tips/test_tips.h"
+#include "Cool/i18n/i18n.hpp"
 #include <fmt/chrono.h>
 #include <imgui.h>
 #include "Cool/Tips/TipsManager.h"
@@ -6,7 +7,7 @@
 
 void Cool::test_tips(Cool::TipsManager& tips_manager)
 {
-    if (ImGui::Button("Open a tip"))
+    if (ImGui::Button(Cool::i18n::label("Open a tip").c_str()))
         tips_manager.open_one_tip_window();
 
     // imgui text with next time of opening

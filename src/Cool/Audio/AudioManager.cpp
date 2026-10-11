@@ -1,4 +1,5 @@
 #include "AudioManager.h"
+#include "Cool/i18n/i18n.hpp"
 #include <glpp-extended/src/TextureLayout.h>
 #include <imgui.h>
 #include "Cool/Audio/AudioManager.h"
@@ -211,11 +212,11 @@ void AudioManager::set_current_input_mode(AudioInputMode mode)
 static auto imgui_spectrum_display_as_bars(bool* val) -> bool
 {
     bool b = false;
-    if (ImGui::BeginCombo("Display as", *val ? "Bars" : "Lines"))
+    if (ImGui::BeginCombo(Cool::i18n::label("Display as").c_str(), *val ? "Bars" : "Lines"))
     {
         {
             bool const is_selected = *val;
-            if (ImGui::Selectable("Bars", is_selected))
+            if (ImGui::Selectable(Cool::i18n::label("Bars").c_str(), is_selected))
             {
                 *val = true;
                 b    = true;
@@ -225,7 +226,7 @@ static auto imgui_spectrum_display_as_bars(bool* val) -> bool
         }
         {
             bool const is_selected = !*val;
-            if (ImGui::Selectable("Lines", is_selected))
+            if (ImGui::Selectable(Cool::i18n::label("Lines").c_str(), is_selected))
             {
                 *val = false;
                 b    = true;
@@ -245,9 +246,9 @@ void AudioManager::imgui_window()
         _window.open();
 
     _window.show([&](bool /*is_opening*/) {
-        ImGui::SeparatorText("Input Selection");
+        ImGui::SeparatorText(Cool::tr("Input Selection"));
         // Select the input mode
-        if (ImGui::BeginCombo("Input Mode", to_string(_current_input_mode)))
+        if (ImGui::BeginCombo(Cool::i18n::label("Input Mode").c_str(), to_string(_current_input_mode)))
         {
             int const mode = static_cast<int>(_current_input_mode);
             for (int i = 0; i < 2; ++i)
@@ -267,14 +268,14 @@ void AudioManager::imgui_window()
         ImGui::NewLine();
         if (ImGui::BeginTabBar("##audio_features"))
         {
-            if (ImGui::BeginTabItem("Volume"))
+            if (ImGui::BeginTabItem(Cool::i18n::label("Volume").c_str()))
             {
                 ImGuiExtras::progress_bar(volume(), {0.f, 0.f});
-                _audio_data_has_been_invalidated |= ImGui::SliderFloat("Window size##Volume", &_window_size_in_seconds_for_volume, 0.f, 1.f, "%.3f seconds");
+                _audio_data_has_been_invalidated |= ImGui::SliderFloat(Cool::i18n::label("Window size##Volume").c_str(), &_window_size_in_seconds_for_volume, 0.f, 1.f, "%.3f seconds");
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Waveform"))
+            if (ImGui::BeginTabItem(Cool::i18n::label("Waveform").c_str()))
             {
                 ImGui::PlotLines(
                     "##Waveform",
@@ -284,11 +285,11 @@ void AudioManager::imgui_window()
                     -1.f, 1.f, // Values are between -1 and 1
                     {0.f, 100.f}
                 );
-                _audio_data_has_been_invalidated |= ImGui::SliderFloat("Window size##Waveform", &_window_size_in_seconds_for_waveform, 0.f, 0.74f, "%.3f seconds");
+                _audio_data_has_been_invalidated |= ImGui::SliderFloat(Cool::i18n::label("Window size##Waveform").c_str(), &_window_size_in_seconds_for_waveform, 0.f, 0.74f, "%.3f seconds");
                 ImGui::EndTabItem();
             }
 
-            if (ImGui::BeginTabItem("Spectrum"))
+            if (ImGui::BeginTabItem(Cool::i18n::label("Spectrum").c_str()))
             {
                 if (_spectrum_display_as_bars)
                 {
@@ -313,9 +314,9 @@ void AudioManager::imgui_window()
                     );
                 }
                 _audio_data_has_been_invalidated |= imgui_spectrum_display_as_bars(&_spectrum_display_as_bars);
-                _audio_data_has_been_invalidated |= ImGui::SliderFloat("Window size##Spectrum", &_window_size_in_seconds_for_spectrum, 0.f, 0.5f, "%.3f seconds");
-                _audio_data_has_been_invalidated |= ImGui::SliderFloat("Max pitch computed", &_spectrum_max_frequency_in_hz, 0.f, 22000.f, "%.0f Hertz");
-                _audio_data_has_been_invalidated |= ImGui::DragFloat("Height stretch", &_spectrum_height_scale, 0.01f, 0.0001f, FLT_MAX);
+                _audio_data_has_been_invalidated |= ImGui::SliderFloat(Cool::i18n::label("Window size##Spectrum").c_str(), &_window_size_in_seconds_for_spectrum, 0.f, 0.5f, "%.3f seconds");
+                _audio_data_has_been_invalidated |= ImGui::SliderFloat(Cool::i18n::label("Max pitch computed").c_str(), &_spectrum_max_frequency_in_hz, 0.f, 22000.f, "%.0f Hertz");
+                _audio_data_has_been_invalidated |= ImGui::DragFloat(Cool::i18n::label("Height stretch").c_str(), &_spectrum_height_scale, 0.01f, 0.0001f, FLT_MAX);
                 ImGui::EndTabItem();
             }
 

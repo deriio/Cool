@@ -1,4 +1,5 @@
 #include "TaskManager.hpp"
+#include "Cool/i18n/i18n.hpp"
 #include <imgui.h>
 #include <algorithm>
 #include <chrono>
@@ -208,7 +209,7 @@ void TaskManager::cancel_all(reg::AnyId const& owner_id)
 
 void TaskManager::imgui_show_debug_tasks_list()
 {
-    if (ImGui::Button("Cancel all tasks"))
+    if (ImGui::Button(Cool::i18n::label("Cancel all tasks").c_str()))
         cancel_all();
 
     auto task_to_cancel = std::shared_ptr<Task>{nullptr};
@@ -216,22 +217,22 @@ void TaskManager::imgui_show_debug_tasks_list()
         auto lock  = std::shared_lock{_tasks_waiting_mutex};
         auto lock2 = std::shared_lock{_tasks_to_process_mutex};
 
-        ImGui::SeparatorText(fmt::format("Tasks Waiting ({})", _tasks_waiting.size()).c_str());
+        ImGui::SeparatorText(fmt::format(fmt::runtime(Cool::tr("Tasks Waiting ({})")), _tasks_waiting.size()).c_str());
         for (auto const& task : _tasks_waiting)
         {
             ImGui::PushID(&task);
-            if (ImGui::Button("Cancel"))
+            if (ImGui::Button(Cool::i18n::label("Cancel").c_str()))
                 task_to_cancel = task.task;
             ImGui::SameLine();
             ImGui::TextUnformatted(fmt::format("  - {}", task.task->name()).c_str());
             ImGui::PopID();
         }
 
-        ImGui::SeparatorText(fmt::format("Tasks in Progress ({})", _all_tasks_in_progress.size()).c_str());
+        ImGui::SeparatorText(fmt::format(fmt::runtime(Cool::tr("Tasks in Progress ({})")), _all_tasks_in_progress.size()).c_str());
         for (auto const& task : _all_tasks_in_progress)
         {
             ImGui::PushID(&task);
-            if (ImGui::Button("Cancel"))
+            if (ImGui::Button(Cool::i18n::label("Cancel").c_str()))
                 task_to_cancel = task.task;
             ImGui::SameLine();
             ImGui::TextUnformatted(fmt::format("  - {}", task.task->name()).c_str());

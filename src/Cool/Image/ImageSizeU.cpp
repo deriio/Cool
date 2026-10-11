@@ -1,4 +1,5 @@
 #include "ImageSizeU.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/ImGuiExtras.h>
 
 namespace Cool::ImageSizeU {
@@ -6,7 +7,7 @@ namespace Cool::ImageSizeU {
 auto imgui(img::Size& size) -> WH
 {
     auto changed_side{WH::None};
-    ImGui::Text("Resolution: ");
+    ImGui::Text(Cool::tr("Resolution: "));
     ImGui::SameLine();
     {
         ImGui::PushItemWidth(ImGui::CalcTextSize("00000").x + ImGui::GetStyle().FramePadding.x); // Enough width for any 5-digit number.
@@ -29,4 +30,4 @@ auto imgui(img::Size& size) -> WH
     return changed_side;
 }
 
-} // namespace Cool::ImageSizeU
+} // namespace Cool::ImageSizeU

@@ -1,4 +1,5 @@
 #include "PresetManager.h"
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/ImGuiExtras.h>
 #include <imgui.h>
 #include "Cool/Log/boxer_show.hpp"
@@ -59,8 +60,8 @@ auto PresetManager::add(Preset preset, bool show_warning_messages) -> PresetId
         if (show_warning_messages)
         {
             boxer_show(
-                "There is already a preset with the same values.",
-                "Adding failed",
+                Cool::tr("There is already a preset with the same values."),
+                Cool::tr("Adding failed"),
                 boxer::Style::Warning,
                 boxer::Buttons::OK
             );
@@ -72,8 +73,8 @@ auto PresetManager::add(Preset preset, bool show_warning_messages) -> PresetId
         if (show_warning_messages)
         {
             boxer_show(
-                "There is already a preset with the same name.",
-                "Adding failed",
+                Cool::tr("There is already a preset with the same name."),
+                Cool::tr("Adding failed"),
                 boxer::Style::Warning,
                 boxer::Buttons::OK
             );
@@ -107,8 +108,8 @@ void PresetManager::edit(PresetId const& id, Settings const& new_values)
     else
     {
         boxer_show(
-            "There is already a preset with the same values.",
-            "Editing failed",
+            Cool::tr("There is already a preset with the same values."),
+            Cool::tr("Editing failed"),
             boxer::Style::Warning,
             boxer::Buttons::OK
         );
@@ -134,7 +135,7 @@ void PresetManager::rename(const PresetId& id, std::string_view new_name)
     {
         const auto choice = boxer_show(
             fmt::format("There is already a preset called \"{}\", do you want to overwrite it?", new_name).c_str(),
-            "Are you sure?",
+            Cool::tr("Are you sure?"),
             boxer::Style::Warning,
             boxer::Buttons::OKCancel
         );
@@ -235,7 +236,7 @@ auto PresetManager::dropdown(
 void PresetManager::name_selector()
 {
     const auto id = dropdown(
-        "New preset name",
+        Cool::i18n::label("New preset name").c_str(),
         "",
         ImGuiComboFlags_NoPreview | ImGuiComboFlags_PopupAlignLeft, // Draw just the arrow of the dropdown
         ImDrawFlags_RoundCornersRight
@@ -252,11 +253,11 @@ void PresetManager::name_selector()
 
 static void delete_button(const PresetId& id, std::string_view name, PresetManager& preset_manager)
 {
-    if (ImGui::Button("Delete Preset"))
+    if (ImGui::Button(Cool::i18n::label("Delete Preset").c_str()))
     {
         const auto choice = boxer_show(
             fmt::format("You are about to delete \"{}\", are you sure?", name).c_str(),
-            "Are you sure?",
+            Cool::tr("Are you sure?"),
             boxer::Style::Warning,
             boxer::Buttons::OKCancel
         );
@@ -270,7 +271,7 @@ static void delete_button(const PresetId& id, std::string_view name, PresetManag
 void PresetManager::RenamerWidget::imgui(const PresetId& id, std::string_view current_name, PresetManager& preset_manager)
 {
     const bool was_open_last_frame{_popup_is_open};
-    _popup_is_open = ImGuiExtras::begin_popup_context_menu_from_button("Rename");
+    _popup_is_open = ImGuiExtras::begin_popup_context_menu_from_button(Cool::i18n::label("Rename").c_str());
     if (_popup_is_open)
     {
         if (!was_open_last_frame)
@@ -293,14 +294,14 @@ void PresetManager::RenamerWidget::imgui(const PresetId& id, std::string_view cu
 static auto add_button(bool the_name_is_not_already_used, std::string_view name) -> bool
 {
     auto is_clicked{false};
-    Cool::ImGuiExtras::disabled_if(name == "", "Can't create a preset with an empty name.", [&]() {
+    Cool::ImGuiExtras::disabled_if(name == "", Cool::tr("Can't create a preset with an empty name."), [&]() {
         if (the_name_is_not_already_used)
         {
-            is_clicked = ImGui::Button("Save Preset");
+            is_clicked = ImGui::Button(Cool::i18n::label("Save Preset").c_str());
         }
         else
         {
-            is_clicked = Cool::ImGuiExtras::colored_button("Overwrite", 0.11f);
+            is_clicked = Cool::ImGuiExtras::colored_button(Cool::i18n::label("Overwrite").c_str(), 0.11f);
         }
     });
     return is_clicked;
@@ -319,7 +320,7 @@ static auto make_sure_the_user_wants_to_overwrite_the_preset(std::string_view ne
 {
     return boxer_show(
                fmt::format("You are about to overwrite \"{}\", are you sure?", new_preset_name).c_str(),
-               "Are you sure?",
+               Cool::tr("Are you sure?"),
                boxer::Style::Warning,
                boxer::Buttons::OKCancel
            )
@@ -378,7 +379,7 @@ auto PresetManager::imgui_presets(Settings_Ref settings) -> bool
 {
     _current_preset_id               = find_preset_with_given_values(settings);
     auto const current_preset_name   = preset_name(_current_preset_id);
-    auto const selected_id           = dropdown("Presets", current_preset_name.value_or("Unsaved Settings..."));
+    auto const selected_id           = dropdown(Cool::i18n::label("Presets").c_str(), current_preset_name.value_or(Cool::tr("Unsaved Settings...")));
     auto       settings_have_changed = apply(selected_id, settings);
 
     if (!current_preset_name)

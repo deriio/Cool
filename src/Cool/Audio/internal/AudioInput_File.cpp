@@ -1,4 +1,5 @@
 #include "AudioInput_File.h"
+#include "Cool/i18n/i18n.hpp"
 #include <optional>
 #include "Audio/Audio.hpp"
 #include "Cool/ImGui/IcoMoonCodepoints.h"
@@ -62,7 +63,7 @@ static auto imgui_widgets(Audio::PlayerProperties& props) -> bool
     ImGui::SameLine();
 
     ImGuiExtras::disabled_if(props.is_muted, "The audio is muted.", [&]() {
-        ImGui::SliderFloat("Playback Volume", &props.volume, 0.f, 1.f);
+        ImGui::SliderFloat(Cool::i18n::label("Playback Volume").c_str(), &props.volume, 0.f, 1.f);
     });
 
     return b;
@@ -107,7 +108,7 @@ void AudioInput_File::try_load_current_file()
             _notification_id,
             {
                 .type     = ImGuiNotify::Type::Error,
-                .title    = "Audio File",
+                .title    = Cool::tr("Audio File"),
                 .content  = e.what(),
                 .duration = std::nullopt,
                 .closable = false,

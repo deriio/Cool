@@ -6,7 +6,7 @@ namespace Cool {
 auto imgui_widget(Variable<ColorPalette>& var) -> bool
 {
     return imgui_widget(
-        var.name(),
+        var.label(),
         var.value(),
         internal::color_imgui_flags(var.metadata().is_hdr)
     );

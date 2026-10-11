@@ -20,6 +20,7 @@ struct UserSettings {
     bool                          enable_multi_viewport{should_enable_multi_viewport_by_default()};
     VideoExportOverwriteBehaviour video_export_overwrite_behaviour{VideoExportOverwriteBehaviour::AskBeforeCreatingNewFolder};
     float                         ui_zoom{1.f};
+    std::string                   language{"ru"}; // Russian is the default language
 
     void change_ui_zoom(float delta);
     void set_ui_zoom(float zoom);
@@ -60,6 +61,7 @@ private:
             json_get(json, "Video export overwrite behaviour", video_export_overwrite_behaviour);
             json_get(json, "UI Scale", ui_zoom); // Backward compatibility
             json_get(json, "UI Zoom", ui_zoom);
+            json_get(json, "Language", language);
             need_to_rebuild_fonts() = true;
         },
         [&](nlohmann::json& json) {
@@ -71,6 +73,7 @@ private:
             json_set(json, "Enable multi viewport", enable_multi_viewport);
             json_set(json, "Video export overwrite behaviour", video_export_overwrite_behaviour);
             json_set(json, "UI Zoom", ui_zoom);
+            json_set(json, "Language", language);
         },
         true /*use_shared_user_data*/
     };

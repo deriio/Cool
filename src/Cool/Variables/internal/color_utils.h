@@ -1,4 +1,5 @@
 #pragma once
+#include "Cool/i18n/i18n.hpp"
 #include <Cool/ImGui/ImGuiExtras.h>
 
 namespace Cool::internal {
@@ -12,15 +13,15 @@ inline auto color_imgui_flags(bool is_hdr) -> ImGuiColorEditFlags
 
 inline auto color_metadata_widget(bool& is_hdr) -> bool
 {
-    const bool b = ImGuiExtras::toggle("HDR", &is_hdr);
-    ImGuiExtras::help_marker("Allows the RGB values to go outside of the [0, 255] range.");
+    const bool b = ImGuiExtras::toggle(Cool::i18n::label("HDR").c_str(), &is_hdr);
+    ImGuiExtras::help_marker(Cool::tr("Allows the RGB values to go outside of the [0, 255] range."));
     return b;
 }
 
 inline auto color_and_alpha_metadata_widget(bool& is_hdr) -> bool
 {
-    const bool b = ImGuiExtras::toggle("HDR", &is_hdr);
-    ImGuiExtras::help_marker("Allows the RGBA values to go outside of the [0, 255] range.");
+    const bool b = ImGuiExtras::toggle(Cool::i18n::label("HDR").c_str(), &is_hdr);
+    ImGuiExtras::help_marker(Cool::tr("Allows the RGBA values to go outside of the [0, 255] range."));
     return b;
 }
 

@@ -1,4 +1,5 @@
 #include "OSCManager.h"
+#include "Cool/i18n/i18n.hpp"
 #include <exception>
 #include <mutex>
 #include <regex>
@@ -153,7 +154,7 @@ void OSCManager::imgui_values_table()
             ImGui::EndGroup();
             if (ImGui::BeginPopupContextItem(&channel.name))
             {
-                if (ImGui::Button("Copy to clipboard"))
+                if (ImGui::Button(Cool::i18n::label("Copy to clipboard").c_str()))
                 {
                     ImGui::SetClipboardText(channel.name.c_str());
                     ImGui::CloseCurrentPopup();
@@ -167,7 +168,7 @@ void OSCManager::imgui_values_table()
             ImGui::EndGroup();
             if (ImGui::BeginPopupContextItem(&value))
             {
-                if (ImGui::Button("Copy to clipboard"))
+                if (ImGui::Button(Cool::i18n::label("Copy to clipboard").c_str()))
                 {
                     ImGui::SetClipboardText(fmt::format("{}", value).c_str());
                     ImGui::CloseCurrentPopup();
@@ -206,7 +207,7 @@ void OSCManager::imgui_button_to_reset_values()
 
     if (ImGuiExtras::button_with_text_icon(ICOMOON_UNDO))
         reset_values();
-    ImGui::SetItemTooltip("Reset all values");
+    ImGui::SetItemTooltip(Cool::tr("Reset all values"));
 }
 
 auto OSCManager::values_are_empty() const -> bool

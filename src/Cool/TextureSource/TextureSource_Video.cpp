@@ -1,4 +1,5 @@
 #include "TextureSource_Video.h"
+#include "Cool/i18n/i18n.hpp"
 #include <open/open.hpp>
 #include "Cool/File/File.h"
 #include "TextureLibrary_Video.h"
@@ -25,10 +26,10 @@ auto TextureSource_Video::get_error_notification() const -> std::optional<ImGuiN
 
     return ImGuiNotify::Notification{
         .type                 = ImGuiNotify::Type::Error,
-        .title                = "Video error",
+        .title                = Cool::tr("Video error"),
         .content              = fmt::format("\"{}\"\n\n{}", Cool::File::weakly_canonical(_video_descriptor.path), *err),
         .custom_imgui_content = [path = _video_descriptor.path](auto&&) {
-            if (ImGui::Button("Try to open file in explorer"))
+            if (ImGui::Button(Cool::i18n::label("Try to open file in explorer").c_str()))
                 Cool::open_focused_in_explorer(path);
         },
         .duration = std::nullopt,
