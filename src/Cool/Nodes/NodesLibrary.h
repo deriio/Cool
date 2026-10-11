@@ -74,6 +74,7 @@ struct NodesMenuParams {
     CheckNodeCompatibility const*        check_compatibility{nullptr}; // nullptr when we are not dragging a link
     bool                                 select_first{false};
     bool                                 menu_just_opened{false};
+    bool                                 dragged_pin_is_output{true}; // Only used when check_compatibility is set
 };
 
 class NodesLibrary {

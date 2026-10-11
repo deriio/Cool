@@ -5,6 +5,7 @@
 #include <fstream>
 #include "Cool/ImGui/ImGuiExtras.h"
 #include "Cool/Path/Path.h"
+#include "Cool/UI Scale/ui_scale.hpp"
 #include "Cool/i18n/i18n.hpp"
 #include "nlohmann/json.hpp"
 
@@ -127,6 +128,38 @@ void constrain_next_menu_size()
     ImGui::SetNextWindowSizeConstraints(ImVec2{0.f, 0.f}, ImVec2{FLT_MAX, max_height});
 }
 
+auto row_height() -> float
+{
+    return std::round(ImGui::GetTextLineHeight() + 8.f * ui_scale());
+}
+
+/// Small colored dot, drawn at the current cursor position (vertically centered on a row of the given height). Doesn't move the cursor.
+void draw_dot(ImVec2 pos, float row_h, ImU32 color)
+{
+    auto const radius = std::round(3.5f * ui_scale());
+    ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2{pos.x + radius + 2.f * ui_scale(), pos.y + row_h * 0.5f}, radius, color);
+}
+
+/// Small muted header with a colored dot, used to introduce a block of nodes
+void muted_header(const char* text, std::optional<ImU32> dot_color, bool add_space_before)
+{
+    if (add_space_before)
+        ImGui::Dummy(ImVec2{0.f, 6.f * ui_scale()});
+    auto const pos = ImGui::GetCursorScreenPos();
+    auto const h   = ImGui::GetTextLineHeight() + 4.f * ui_scale();
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 6.f * ui_scale());
+    if (dot_color)
+    {
+        draw_dot(ImVec2{pos.x + 4.f * ui_scale(), pos.y}, h, *dot_color);
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 14.f * ui_scale());
+    }
+    ImGui::AlignTextToFramePadding();
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{0.f, 2.f * ui_scale()});
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextDisabled("%s", text);
+    ImGui::PopStyleVar();
+}
+
 struct NodeEntry {
     NodeDefinition const*            def;
     NodesCategory const*             category;
@@ -191,12 +224,23 @@ public:
         bool        selected = false;
         ImGui::PushID(entry.def);
         Cool::ImGuiExtras::disabled_if(_params.maybe_disable(*entry.def, *entry.category), [&]() {
-            if (ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns /* HACK to work around a bug in ImGui (https://github.com/ocornut/imgui/issues/8203)*/))
+            auto const start_x = ImGui::GetCursorPosX();
+            auto const avail_x = ImGui::GetContentRegionAvail().x;
+            ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2{0.f, 0.5f});
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f * ui_scale());
+            if (ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns /* HACK to work around a bug in ImGui (https://github.com/ocornut/imgui/issues/8203)*/, ImVec2{0.f, row_height()}))
                 selected = true;
+            ImGui::PopStyleVar(2);
             if (show_category)
             {
-                ImGui::SameLine();
-                ImGui::TextDisabled("%s", i18n::tr_category(entry.category->name()).c_str());
+                auto const& category_name = i18n::tr_category(entry.category->name());
+                auto const  text_w        = ImGui::CalcTextSize(category_name.c_str()).x;
+                auto const  name_w        = ImGui::CalcTextSize(name.c_str()).x;
+                auto const  x             = std::max(start_x + avail_x - text_w - 8.f * ui_scale(), start_x + name_w + 28.f * ui_scale());
+                ImGui::SameLine(x);
+                auto const y = ImGui::GetCursorPosY();
+                ImGui::SetCursorPosY(y + (row_height() - ImGui::GetTextLineHeight()) * 0.5f - ImGui::GetStyle().ItemSpacing.y * 0.5f + 0.f);
+                ImGui::TextDisabled("%s", category_name.c_str());
             }
         });
         ImGui::PopID();
@@ -222,7 +266,7 @@ public:
             if (!separator_done && needs_conversion(entry))
             {
                 separator_done = true;
-                ImGuiExtras::separator_text(tr("With conversion"));
+                muted_header(tr("With conversion"), std::nullopt, true);
             }
             if (selectable(entry, show_category))
                 return;
@@ -239,14 +283,12 @@ private:
     std::optional<NodesMenuSelection> _selection{};
 };
 
-void imgui_category_nodes(MenuContext& ctx, NodesCategory const& category)
+void imgui_category_nodes(MenuContext& ctx, NodesCategory const& category, bool first)
 {
     auto const entries = ctx.entries([&](NodeDefinition const&, NodesCategory const& cat) { return &cat == &category; });
     if (entries.empty())
         return;
-    ImGui::PushStyleColor(ImGuiCol_Text, category.config().color().as_ImColor().Value);
-    ImGuiExtras::separator_text(i18n::tr_category(category.name()));
-    ImGui::PopStyleColor();
+    muted_header(i18n::tr_category(category.name()).c_str(), ImGui::GetColorU32(category.config().color().as_ImColor().Value), !first);
     ImGui::PushID(&category);
     ctx.list(entries, false);
     ImGui::PopID();
@@ -268,11 +310,23 @@ void imgui_tab_by_type(MenuContext& ctx)
         if (std::none_of(categories.begin(), categories.end(), [&](NodesCategory const* cat) { return category_has_visible_nodes(ctx, *cat); }))
             return;
         constrain_next_menu_size();
-        if (ImGui::BeginMenu(name.c_str()))
+        auto const row_h = ImGui::GetTextLineHeight();
+        auto const pos   = ImGui::GetCursorScreenPos();
+        auto const first_color = ImGui::GetColorU32(categories.front()->config().color().as_ImColor().Value);
+        draw_dot(ImVec2{pos.x + 4.f * ui_scale(), pos.y}, row_h, first_color);
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f * ui_scale());
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ImGui::GetStyle().ItemSpacing.x, 9.f * ui_scale()});
+        bool const open = ImGui::BeginMenu(("      " + name).c_str());
+        ImGui::PopStyleVar(2);
+        if (open)
         {
+            bool is_first = true;
             for (auto const* category : categories)
             {
-                imgui_category_nodes(ctx, *category);
+                if (!category_has_visible_nodes(ctx, *category))
+                    continue;
+                imgui_category_nodes(ctx, *category, is_first);
+                is_first = false;
                 if (ctx.selection())
                     break;
             }
@@ -317,7 +371,11 @@ void imgui_tab_by_task(MenuContext& ctx)
         if (entries.empty())
             continue;
         constrain_next_menu_size();
-        if (ImGui::BeginMenu(i18n::tr_task(task.id).c_str()))
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f * ui_scale());
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ImGui::GetStyle().ItemSpacing.x, 9.f * ui_scale()});
+        bool const open = ImGui::BeginMenu(i18n::tr_task(task.id).c_str());
+        ImGui::PopStyleVar(2);
+        if (open)
         {
             ImGui::PushID(&task);
             ctx.list(entries, true);
@@ -419,7 +477,11 @@ void imgui_search_results(MenuContext& ctx)
 
     if (results.empty())
     {
-        ImGui::TextDisabled("%s", tr("No node found"));
+        ImGui::Dummy(ImVec2{0.f, 6.f * ui_scale()});
+        auto const text = tr("No node found");
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + std::max(0.f, (ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(text).x) * 0.5f));
+        ImGui::TextDisabled("%s", text);
+        ImGui::Dummy(ImVec2{0.f, 6.f * ui_scale()});
         return;
     }
 
@@ -435,8 +497,22 @@ void imgui_search_results(MenuContext& ctx)
         entries.push_back(result.entry);
 
     auto const max_height = ImGui::GetMainViewport()->WorkSize.y * 0.5f;
-    auto const height     = std::min(max_height, static_cast<float>(entries.size()) * ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().WindowPadding.y);
-    if (ImGui::BeginChild("##search_results", ImVec2{std::max(ImGui::GetContentRegionAvail().x, 300.f), height}))
+    auto const height     = std::min(max_height, static_cast<float>(entries.size()) * (row_height() + ImGui::GetStyle().ItemSpacing.y) + 8.f * ui_scale());
+    auto needed_width = 340.f * ui_scale();
+    for (auto const& entry : entries)
+    {
+        needed_width = std::max(
+            needed_width,
+            ImGui::CalcTextSize(i18n::tr_node(entry.category->name(), entry.def->name()).c_str()).x
+                + ImGui::CalcTextSize(i18n::tr_category(entry.category->name()).c_str()).x
+                + 44.f * ui_scale()
+        );
+    }
+    ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0.f, 0.f});
+    bool const child_visible = ImGui::BeginChild("##search_results", ImVec2{std::max(ImGui::GetContentRegionAvail().x, needed_width), height});
+    ImGui::PopStyleVar(2);
+    if (child_visible)
         ctx.list(entries, true);
     ImGui::EndChild();
 }
@@ -450,10 +526,35 @@ auto NodesLibrary::imgui_nodes_menu(NodesMenuParams const& params) const -> std:
     if (params.menu_just_opened)
         menu_state().show_incompatible_nodes = false;
 
+    struct StyleScope { // Roomier rows in the whole menu
+        StyleScope()
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ImGui::GetStyle().ItemSpacing.x, 2.f * ui_scale()});
+        }
+        ~StyleScope() { ImGui::PopStyleVar(); }
+    } style_scope{};
+
     if (params.check_compatibility && *params.check_compatibility)
     {
-        ImGuiExtras::toggle(tr("Show all nodes"), &menu_state().show_incompatible_nodes);
-        ImGuiExtras::help_marker(tr("By default, only the nodes that can be plugged into the link you are dragging are shown."));
+        auto count = 0;
+        for (auto const& category : _categories)
+        {
+            for (auto const& def : category.definitions())
+                count += (*params.check_compatibility)(def, category).has_value() ? 1 : 0;
+        }
+        auto const text = fmt::format(
+            fmt::runtime(params.dragged_pin_is_output ? tr("Compatible with the output: {} nodes") : tr("Compatible with the input: {} nodes")),
+            count
+        );
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextDisabled("%s", text.c_str());
+        auto const label    = tr("Show all nodes");
+        auto const width    = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(label).x;
+        ImGui::SameLine(std::max(ImGui::GetCursorPosX() + 16.f * ui_scale(), ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - width));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{2.f * ui_scale(), 2.f * ui_scale()});
+        ImGui::Checkbox(label, &menu_state().show_incompatible_nodes);
+        ImGui::PopStyleVar();
+        ImGui::SetItemTooltip("%s", tr("By default, only the nodes that can be plugged into the link you are dragging are shown."));
     }
 
     if (!params.filter.empty())

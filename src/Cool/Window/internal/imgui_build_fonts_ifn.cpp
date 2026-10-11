@@ -32,18 +32,6 @@ void imgui_build_fonts_ifn()
     io.Fonts->Clear();
     ImGui::GetIO().FontGlobalScale = 1.f;
 
-    // Satoshi has no Cyrillic glyphs, so we merge them from Inter (which looks similar)
-    auto const merge_cyrillic_into_current_font = [&](const char* style, float size) {
-        ImFontConfig config;
-        config.MergeMode  = true;
-        config.PixelSnapH = true;
-        static const ImWchar cyrillic_ranges[] = {0x0400, 0x04FF, 0x2013, 0x2014, 0x2026, 0x2026, 0x2116, 0x2116, 0x00AB, 0x00AB, 0x00BB, 0x00BB, 0}; // NOLINT(*-avoid-c-arrays)
-        io.Fonts->AddFontFromFileTTF(
-            (Cool::Path::cool_res() / fmt::format("fonts/Inter/Inter-Cyrillic-{}.otf", style)).string().c_str(),
-            size, &config, cyrillic_ranges
-        );
-    };
-
     auto const merge_icons_into_current_font = [&]() { // Merge icons into default font
         ImFontConfig config;
         config.MergeMode   = true;
@@ -63,28 +51,24 @@ void imgui_build_fonts_ifn()
         );
     };
 
+    static const ImWchar inter_ranges[] = {0x0020, 0x00FF, 0x0100, 0x017F, 0x0400, 0x04FF, 0x2010, 0x2027, 0x2030, 0x203A, 0x20AC, 0x20AC, 0x2116, 0x2116, 0x2122, 0x2122, 0x2190, 0x2193, 0x2212, 0x2212, 0}; // NOLINT(*-avoid-c-arrays)
+    auto const              inter = [](char const* style) { return (Cool::Path::cool_res() / fmt::format("fonts/Inter/Inter-{}.otf", style)).string(); };
+    // Inter (subset: Latin + Cyrillic + punctuation) is used for all the UI fonts
+
     { // Window title font // Must be first so that it is the default font. This is mandatory because window titles can only use the default font.
-        auto const path      = Cool::Path::cool_res() / "fonts/Satoshi/Fonts/Satoshi-Bold.otf";
-        Font::window_title() = io.Fonts->AddFontFromFileTTF(path.string().c_str(), window_title_font_size);
-        merge_cyrillic_into_current_font("Bold", window_title_font_size);
+        Font::window_title() = io.Fonts->AddFontFromFileTTF(inter("SemiBold").c_str(), window_title_font_size, nullptr, inter_ranges);
         merge_icons_into_current_font();
     }
     { // Bold font
-        auto const path = Cool::Path::cool_res() / "fonts/Satoshi/Fonts/Satoshi-Bold.otf";
-        Font::bold()    = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size);
-        merge_cyrillic_into_current_font("Bold", font_size);
+        auto const path = inter("SemiBold");
+        Font::bold()    = io.Fonts->AddFontFromFileTTF(path.c_str(), font_size, nullptr, inter_ranges);
         merge_icons_into_current_font();
-        Font::heading_1() = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size * 1.6f);
-        merge_cyrillic_into_current_font("Bold", font_size * 1.6f);
-        Font::heading_2() = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size * 1.3f);
-        merge_cyrillic_into_current_font("Bold", font_size * 1.3f);
-        Font::heading_3() = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size * 1.1f);
-        merge_cyrillic_into_current_font("Bold", font_size * 1.1f);
+        Font::heading_1() = io.Fonts->AddFontFromFileTTF(path.c_str(), font_size * 1.6f, nullptr, inter_ranges);
+        Font::heading_2() = io.Fonts->AddFontFromFileTTF(path.c_str(), font_size * 1.3f, nullptr, inter_ranges);
+        Font::heading_3() = io.Fonts->AddFontFromFileTTF(path.c_str(), font_size * 1.1f, nullptr, inter_ranges);
     }
     { // Italic font
-        auto const path = Cool::Path::cool_res() / "fonts/Satoshi/Fonts/Satoshi-Italic.otf";
-        Font::italic()  = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size);
-        merge_cyrillic_into_current_font("Italic", font_size);
+        Font::italic() = io.Fonts->AddFontFromFileTTF(inter("Italic").c_str(), font_size, nullptr, inter_ranges);
         merge_icons_into_current_font();
     }
     { // Monospace font
@@ -92,9 +76,7 @@ void imgui_build_fonts_ifn()
         Font::monospace() = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size, nullptr, io.Fonts->GetGlyphRangesCyrillic()); // Roboto Mono already contains Cyrillic glyphs
     }
     { // Regular font
-        auto const path = Cool::Path::cool_res() / "fonts/Satoshi/Fonts/Satoshi-Regular.otf";
-        Font::regular() = io.Fonts->AddFontFromFileTTF(path.string().c_str(), font_size);
-        merge_cyrillic_into_current_font("Regular", font_size);
+        Font::regular() = io.Fonts->AddFontFromFileTTF(inter("Regular").c_str(), font_size, nullptr, inter_ranges);
         merge_icons_into_current_font();
         ImGuiNotify::add_icons_to_current_font(icons_size, ImVec2{0.f, 0.f});
     }

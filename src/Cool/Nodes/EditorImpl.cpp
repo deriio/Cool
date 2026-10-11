@@ -7,6 +7,7 @@
 #include "Cool/ImGui/icon_fmt.h"
 #include "Cool/i18n/i18n.hpp"
 #include "Cool/StrongTypes/Color.h"
+#include "Cool/UI Scale/ui_scale.hpp"
 #include "NodesConfig.h"
 #include "NodesGraph.h"
 #include "NodesLibrary.h"
@@ -30,6 +31,7 @@ auto SearchBarState::imgui_widget() -> bool
         ImGui::SetKeyboardFocusHere();
     }
     ImGui::PushID(868686);
+    ImGui::SetNextItemWidth(-FLT_MIN);
     bool const b = ImGui::InputTextWithHint("##Filter", icon_fmt(tr("Name or task"), ICOMOON_SEARCH).c_str(), &_nodes_filter, ImGuiInputTextFlags_EnterReturnsTrue);
     ImGui::PopID();
     return b;
@@ -276,6 +278,7 @@ auto NodesEditorImpl::imgui_nodes_menu(NodesLibrary const& library, MaybeDisable
         .check_compatibility = _pin_to_link_to_new_node ? &_check_compatibility : nullptr,
         .select_first        = should_select_first_node,
         .menu_just_opened    = menu_just_opened,
+        .dragged_pin_is_output = _pin_to_link_to_new_node && _pin_to_link_to_new_node->kind() == PinKind::Output,
     });
 }
 
@@ -786,8 +789,12 @@ auto NodesEditorImpl::imgui_workspace(NodesConfig& nodes_cfg, NodesLibrary const
         ImGuiExtras::help_marker_tooltip_content(_deferred_tooltip_text->c_str());
         ImGui::EndTooltip();
     }
-    ImGui::SetNextWindowSizeConstraints(ImVec2{0.f, 0.f}, ImVec2{FLT_MAX, ImGui::GetMainViewport()->WorkSize.y * 0.8f}); // Make sure the menu always fits on screen
-    if (ImGui::BeginPopup("Nodes Library Menu"))
+    ImGui::SetNextWindowSizeConstraints(ImVec2{280.f * ui_scale(), 0.f}, ImVec2{FLT_MAX, ImGui::GetMainViewport()->WorkSize.y * 0.8f}); // Make sure the menu always fits on screen
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{10.f * ui_scale(), 10.f * ui_scale()});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.f * ui_scale());
+    bool const nodes_menu_is_open = ImGui::BeginPopup("Nodes Library Menu");
+    ImGui::PopStyleVar(2);
+    if (nodes_menu_is_open)
     {
         auto const selection = imgui_nodes_menu(library, nodes_cfg.maybe_disable_node_definition(), _menu_just_opened);
         _menu_just_opened    = false;
