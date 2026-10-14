@@ -218,17 +218,31 @@ public:
     }
 
     /// Returns true iff the node was selected
-    auto selectable(NodeEntry const& entry, bool show_category) -> bool
+    /// Width of a row showing the node name and its category. Computed from the content only (never from the window size), otherwise the auto-resizing menus would keep growing and shrinking.
+    static auto row_width(std::vector<NodeEntry> const& entries, bool show_category) -> float
+    {
+        float width = 0.f;
+        for (auto const& entry : entries)
+        {
+            auto w = ImGui::CalcTextSize(i18n::tr_node(entry.category->name(), entry.def->name()).c_str()).x;
+            if (show_category)
+                w += 28.f * ui_scale() + ImGui::CalcTextSize(i18n::tr_category(entry.category->name()).c_str()).x;
+            width = std::max(width, w);
+        }
+        return width + 8.f * ui_scale();
+    }
+
+    auto selectable(NodeEntry const& entry, bool show_category, float width) -> bool
     {
         auto const& name     = i18n::tr_node(entry.category->name(), entry.def->name());
         bool        selected = false;
         ImGui::PushID(entry.def);
         Cool::ImGuiExtras::disabled_if(_params.maybe_disable(*entry.def, *entry.category), [&]() {
             auto const start_x = ImGui::GetCursorPosX();
-            auto const avail_x = ImGui::GetContentRegionAvail().x;
+            auto const avail_x = width;
             ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2{0.f, 0.5f});
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.f * ui_scale());
-            if (ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns /* HACK to work around a bug in ImGui (https://github.com/ocornut/imgui/issues/8203)*/, ImVec2{0.f, row_height()}))
+            if (ImGui::Selectable(name.c_str(), false, ImGuiSelectableFlags_SpanAllColumns /* HACK to work around a bug in ImGui (https://github.com/ocornut/imgui/issues/8203)*/, ImVec2{width, row_height()}))
                 selected = true;
             ImGui::PopStyleVar(2);
             if (show_category)
@@ -260,7 +274,8 @@ public:
     /// Shows the list of nodes, with exact matches first, then a separator, then the nodes that need a conversion.
     void list(std::vector<NodeEntry> const& entries, bool show_category)
     {
-        bool separator_done = false;
+        bool       separator_done = false;
+        auto const width          = row_width(entries, show_category);
         for (auto const& entry : entries)
         {
             if (!separator_done && needs_conversion(entry))
@@ -268,7 +283,7 @@ public:
                 separator_done = true;
                 muted_header(tr("With conversion"), std::nullopt, true);
             }
-            if (selectable(entry, show_category))
+            if (selectable(entry, show_category, width))
                 return;
         }
     }
@@ -510,7 +525,7 @@ void imgui_search_results(MenuContext& ctx)
     }
     ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0.f, 0.f});
-    bool const child_visible = ImGui::BeginChild("##search_results", ImVec2{std::max(ImGui::GetContentRegionAvail().x, needed_width), height});
+    bool const child_visible = ImGui::BeginChild("##search_results", ImVec2{needed_width, height});
     ImGui::PopStyleVar(2);
     if (child_visible)
         ctx.list(entries, true);
@@ -549,8 +564,7 @@ auto NodesLibrary::imgui_nodes_menu(NodesMenuParams const& params) const -> std:
         ImGui::AlignTextToFramePadding();
         ImGui::TextDisabled("%s", text.c_str());
         auto const label    = tr("Show all nodes");
-        auto const width    = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(label).x;
-        ImGui::SameLine(std::max(ImGui::GetCursorPosX() + 16.f * ui_scale(), ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - width));
+        ImGui::SameLine(0.f, 16.f * ui_scale()); // Not right-aligned: aligning on the window width makes the auto-resizing popup oscillate
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{2.f * ui_scale(), 2.f * ui_scale()});
         ImGui::Checkbox(label, &menu_state().show_incompatible_nodes);
         ImGui::PopStyleVar();
